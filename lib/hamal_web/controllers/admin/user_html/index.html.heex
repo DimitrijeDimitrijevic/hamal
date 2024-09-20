@@ -1,0 +1,55 @@
+<.h2>Users in app.</.h2>
+<p>
+  All users in app.
+</p>
+<div class="grid justify-center">
+  <.form :let={f} for={%{}} action={~p"/admin/users"} method="get" class="flex gap-4 h-full">
+    <.input field={f[:q]} type="text" placeholder="username@hotelaloha" />
+    <.input
+      field={f[:type]}
+      type="select"
+      prompt="search by"
+      options={["name", "username", "email"]}
+    />
+    <button class="p-4 rounded-full text-white bg-blue-500 hover:bg-blue-300">
+      <.icon name="hero-magnifying-glass" /> Search
+    </button>
+  </.form>
+</div>
+
+<div class="my-4 flex justify-end">
+  <.link
+    href={~p"/admin/users/new"}
+    class="rounded-full p-3 text-white bg-gray-800 hover:bg-gray-600"
+  >
+    <.icon name="hero-plus-circle" /> Add User
+  </.link>
+</div>
+
+<.table id="users" rows={@users}>
+  <:col :let={user} label="id"><%= user.id %></:col>
+  <:col :let={user} label="name"><%= user.name %></:col>
+  <:col :let={user} label="surname"><%= user.surname %></:col>
+  <:col :let={user} label="username"><%= user.username %></:col>
+  <:col :let={user} label="email"><%= user.email %></:col>
+  <:col :let={user} label="role"><%= role(user.role) %></:col>
+  <:col :let={user} label="last login at"><%= user.last_login_at %></:col>
+  <:action :let={user}>
+    <.link
+      href={~p"/admin/users/#{user}"}
+      method="delete"
+      class="p-2 bg-red-500 text-white hover:bg-red-300  rounded-full"
+      data-confirm={"Are you sure to delete user #{user.username} ?"}
+    >
+      Delete
+    </.link>
+  </:action>
+  <:action :let={user}>
+    <.link
+      href={~p"/admin/users/#{user}/edit"}
+      class="p-2 text-white rounded-full bg-yellow-500 hover:bg-yellow-300"
+    >
+      Edit
+    </.link>
+  </:action>
+</.table>

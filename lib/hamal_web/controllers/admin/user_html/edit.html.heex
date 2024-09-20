@@ -1,0 +1,22 @@
+<.h2>Edit User <%= @user.username %></.h2>
+<p>Edit user details</p>
+<div class="mx-auto max-w-xl">
+  <.simple_form :let={u} for={@user_changeset} action={~p"/admin/users/#{@user}"}>
+    <.input field={u[:name]} label="Name" field_required={true} />
+    <.input field={u[:surname]} label="Surname" field_required={true} />
+    <.input field={u[:email]} label="Email" field_required={true} />
+    <.input
+      field={u[:role]}
+      type="select"
+      prompt="Choose role"
+      label="Role"
+      options={[Receptionist: 1, Housekeeping: 2]}
+      field_required={true}
+    />
+    <.input field={u[:password]} label="Password" type="password" />
+    <:actions>
+      <.button class="w-1/2">Submit</.button>
+      <.back_link navigate={~p"/admin/users"}>Cancel</.back_link>
+    </:actions>
+  </.simple_form>
+</div>

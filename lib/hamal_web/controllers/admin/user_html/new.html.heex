@@ -1,0 +1,28 @@
+<.h2>Add New User</.h2>
+<p>Add new user with role privilages [Receptionist, Housekeeping].
+  Receptionist can manage rooms and reservations, add guests to system.</p>
+<div class="mx-auto max-w-xl">
+  <.simple_form :let={u} for={@user_changeset} action={~p"/admin/users"}>
+    <.input field={u[:name]} label="Name" field_required={true} />
+    <.input field={u[:surname]} label="Surname" field_required={true} />
+    <.input field={u[:email]} label="Email" field_required={true} />
+    <.input
+      field={u[:role]}
+      type="select"
+      prompt="Choose role"
+      label="Role"
+      options={[Receptionist: 1, Housekeeping: 2]}
+      field_required={true}
+    />
+    <.input field={u[:password]} label="Password" type="password" field_required={true} />
+    <:actions>
+      <.button class="w-1/2">Submit</.button>
+      <.link
+        href={~p"/admin/users"}
+        class="text-white bg-red-500 hover:bg-red-400 w-1/2 text-center rounded-lg py-2 px-3 font-semibold"
+      >
+        Cancel
+      </.link>
+    </:actions>
+  </.simple_form>
+</div>
