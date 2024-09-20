@@ -56,6 +56,11 @@ defmodule HamalWeb.Router do
 
     get "/", HomeController, :index
     resources "/users", UserController
+    # TO-DO implement
+    resources "/rooms", RoomController
+    # resources "/reservations", RoomController
+    # resources "/receipts", RoomController
+    resources "/guests", RoomController
   end
 
   ## Authentication routes

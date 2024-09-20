@@ -1,46 +1,47 @@
-<header class="px-4 sm:px-6 lg:px-8"></header>
+<header>
+  <div class="flex flex-row bg-white p-2 border-b-2 text-base ml-2 sticky top-0 z-40">
+    <ul class="my-1 relative z-10 flex gap-6">
+      <li class="hover:bg-gray-200 rounded-full p-2">
+        Reservations
+      </li>
+      <li class="hover:bg-gray-200 rounded-full p-2">
+        <.link>
+          Guests
+        </.link>
+      </li>
+      <li class="hover:bg-gray-200 rounded-full p-2">
+        <.link>
+          Rooms
+        </.link>
+      </li>
+      <li class="hover:bg-gray-200 rounded-full p-2">
+        Receipts
+      </li>
+    </ul>
+    <ul class="my-1 relative flex z-10 gap-4 px-4 ml-auto">
+      <%= if @current_user do %>
+        <li class="text-sm leading-6 text-zinc-900">
+          <%= @current_user.username %>
+        </li>
+        <li>
+          <.link href={~p"/users/settings"} class="rounded-full border-2 p-2">
+            Settings
+          </.link>
+        </li>
+        <li>
+          <.link
+            href={~p"/users/log_out"}
+            method="delete"
+            class="text-base rounded-full border-2 p-2 text-white bg-red-500 hover:bg-red-400"
+          >
+            Log out
+          </.link>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</header>
 <main class="px-4 py-20 sm:px-6 lg:px-8">
-  <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
-    <%= if @current_user do %>
-      <li class="text-[0.8125rem] leading-6 text-zinc-900">
-        <%= @current_user.email %>
-      </li>
-      <li>
-        <.link
-          href={~p"/users/settings"}
-          class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-        >
-          Settings
-        </.link>
-      </li>
-      <li>
-        <.link
-          href={~p"/users/log_out"}
-          method="delete"
-          class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-        >
-          Log out
-        </.link>
-      </li>
-    <% else %>
-      <li>
-        <.link
-          href={~p"/users/register"}
-          class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-        >
-          Register
-        </.link>
-      </li>
-      <li>
-        <.link
-          href={~p"/users/log_in"}
-          class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-        >
-          Log in
-        </.link>
-      </li>
-    <% end %>
-  </ul>
   <div class="mx-auto max-w-2xl">
     <.flash_group flash={@flash} />
     <%= @inner_content %>

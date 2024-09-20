@@ -5,7 +5,7 @@
   <.simple_form :let={u} for={@user_changeset} action={~p"/admin/users"}>
     <.input field={u[:name]} label="Name" field_required={true} />
     <.input field={u[:surname]} label="Surname" field_required={true} />
-    <.input field={u[:email]} label="Email" field_required={true} />
+    <.input field={u[:email]} label="Email" type="email" field_required={true} />
     <.input
       field={u[:role]}
       type="select"

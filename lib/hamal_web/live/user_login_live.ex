@@ -9,7 +9,7 @@ defmodule HamalWeb.UserLoginLive do
       </.header>
 
       <.simple_form for={@form} id="login_form" action={~p"/users/log_in"} phx-update="ignore">
-        <.input field={@form[:email]} type="email" label="Email" />
+        <.input field={@form[:email]} type="email" label="Username" />
         <.input field={@form[:password]} type="password" label="Password" />
 
         <:actions>
