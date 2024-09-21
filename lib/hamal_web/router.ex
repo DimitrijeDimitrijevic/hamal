@@ -14,6 +14,7 @@ defmodule HamalWeb.Router do
   end
 
   pipeline :admin_section do
+    plug HamalWeb.AdminAuth
     plug :put_layout, html: {HamalWeb.Layouts, :admin}
   end
 
@@ -56,11 +57,15 @@ defmodule HamalWeb.Router do
 
     get "/", HomeController, :index
     resources "/users", UserController
-    # TO-DO implement
+
     resources "/rooms", RoomController
+    # TO-DO implement
     # resources "/reservations", RoomController
     # resources "/receipts", RoomController
-    resources "/guests", RoomController
+    live_session :admin, layout: {HamalWeb.Layouts, :admin} do
+      live "/guests", GuestLive.Index, :index
+      live "/guests/:id/edit", GuestLive.Index, :edit
+    end
   end
 
   ## Authentication routes

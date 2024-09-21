@@ -65,6 +65,11 @@ config :hamal, HamalWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :hamal, dev_routes: true
 
+config :hamal, :basic_auth,
+  username: "admin",
+  password: "admin",
+  realm: "Hamal Admin Area"
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 
