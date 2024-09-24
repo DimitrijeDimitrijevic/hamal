@@ -13,7 +13,7 @@ defmodule Hamal.Repo.Migrations.CreateGuestsTable do
       add :notes, :string
       add :document_number, :string
       add :document_type, :string
-      add :bitrh_date, :date
+      add :birth_date, :date
 
       timestamps(type: :utc_datetime)
     end

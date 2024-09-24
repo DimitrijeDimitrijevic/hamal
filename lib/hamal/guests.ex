@@ -7,9 +7,13 @@ defmodule Hamal.Guests do
     |> Guest.changeset()
   end
 
-  def create_guest(%Guest{} = guest) do
-    guest
-    |> Guest.changeset()
+  def create_guest(params) do
+    %Guest{}
+    |> Guest.changeset(params)
     |> Repo.insert()
+  end
+
+  def get_guest(guest_id) do
+    Repo.get_by(Guest, id: guest_id)
   end
 end

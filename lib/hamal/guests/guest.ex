@@ -1,6 +1,9 @@
 defmodule Hamal.Guests.Guest do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Hamal.Helpers.Constants, as: Constants
+
+  @doc_types Constants.doc_types()
 
   @fields [
     :name,
@@ -12,7 +15,8 @@ defmodule Hamal.Guests.Guest do
     :country,
     :notes,
     :document_number,
-    :document_type
+    :document_type,
+    :birth_date
   ]
 
   @required_fields [
@@ -47,7 +51,7 @@ defmodule Hamal.Guests.Guest do
     |> cast(params, @fields)
     |> validate_required(@required_fields)
     |> validate_format(:email, ~r/@/)
-    |> validate_format(:phone, ~r/\d{9,}/)
-    |> validate_inclusion(:document_type, ["passport", "id_card"])
+    # |> validate_format(:phone, ~r/\d{9,}/)
+    |> validate_inclusion(:document_type, @doc_types)
   end
 end

@@ -1,5 +1,48 @@
-<h1>Guest live view</h1>
-<.link patch={~p"/admin/guests/2/edit"}> Edit guest </.link>
-<p>guest id -> <%= @guest_id %></p>
-<p>live_action -> <%= @live_action %></p>
-<p>msg -> <%= @msg %></p>
+<%= if @action not in [:new, :edit] do %>
+  <p>render table of guests with live search and data list</p>
+<% else %>
+  <.h2><%= @title %></.h2>
+  <p>Form for <%= @action %> guests</p>
+  <div class="mx-auto max-w-xl">
+    <.simple_form for={@guest} phx-submit="save" phx-value-action={@action}>
+      <.input field={@guest[:name]} label="Name" field_required={true} />
+      <.input field={@guest[:surname]} label="Surname" field_required={true} />
+      <.input field={@guest[:birth_date]} type="date" label="Date of birth" field_required={true} />
+      <.input field={@guest[:email]} type="email" label="Email" />
+      <.input field={@guest[:phone]} type="tel" label="Phone" />
+      <.input
+        field={@guest[:country]}
+        type="text"
+        list="countries"
+        label="Country"
+        field_required={true}
+      />
+      <datalist id="countries">
+        <option :for={country <- @countries}>
+          <%= country %>
+        </option>
+      </datalist>
+      <.input field={@guest[:city]} label="City" field_required={true} />
+      <.input field={@guest[:address]} label="Address" field_required={true} />
+      <.input
+        field={@guest[:document_type]}
+        label="Document type"
+        type="select"
+        options={@doc_types}
+        field_required={true}
+      />
+      <.input field={@guest[:document_number]} label="Document number" field_required={true} />
+
+      <.input field={@guest[:notes]} type="textarea" label="Notes" />
+      <:actions>
+        <.button class="w-1/2">Submit</.button>
+        <.link
+          href={~p"/admin/guests"}
+          class="text-white bg-red-500 hover:bg-red-400 w-1/2 text-center rounded-lg py-2 px-3 font-semibold"
+        >
+          Cancel
+        </.link>
+      </:actions>
+    </.simple_form>
+  </div>
+<% end %>
