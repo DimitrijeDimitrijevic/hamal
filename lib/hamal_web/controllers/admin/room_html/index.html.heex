@@ -1,0 +1,63 @@
+<.h2>Rooms</.h2>
+<p>
+  All rooms.
+</p>
+<div class="grid justify-center">
+  <.form :let={f} for={%{}} action={~p"/admin/rooms"} method="get" class="flex gap-4 h-full">
+    <.input field={f[:check_in]} type="date" label="Check in date"/>
+    <.input field={f[:check_out]} type="date" label="Check out date"/>
+    <.input
+      label="Status"
+      field={f[:status]}
+      type="select"
+      prompt="search by"
+      options={["available", "booked", "occupied", "under maintenance", "out of order"]}
+    />
+    <button class="h-1/2 mt-auto px-4 rounded-full text-white bg-blue-500 hover:bg-blue-300">
+      <.icon name="hero-magnifying-glass" /> Search
+    </button>
+  </.form>
+</div>
+
+<div class="my-4 justify-end">
+  <.link
+    href={~p"/admin/rooms/new"}
+    class="rounded-full p-3 text-white bg-gray-800 hover:bg-gray-600"
+  >
+    <.icon name="hero-plus-circle" /> Add Room
+  </.link>
+</div>
+
+<.table id="rooms" rows={@rooms}>
+  <:col :let={room} label="Number"><%= room.number %></:col>
+  <:col :let={room} label="Number of beds"><%= room.no_of_beds %></:col>
+  <:col :let={room} label="Price"><%= room.price %></:col>
+  <:col :let={room} label="Status"><%= room_status(room.status) %></:col>
+  <:col :let={room} label="No of Reservations">count to all reservations</:col>
+  <:action :let={room}>
+    <.link
+      href={~p"/admin/rooms/#{room}"}
+      class="p-2 bg-green-500 text-white hover:bg-green-300  rounded-full"
+    >
+      Show
+    </.link>
+  </:action>
+  <:action :let={room}>
+    <.link
+      href={~p"/admin/rooms/#{room}/edit"}
+      class="p-2 text-white rounded-full bg-yellow-500 hover:bg-yellow-300"
+    >
+      Edit
+    </.link>
+  </:action>
+  <:action :let={room}>
+    <.link
+      href={~p"/admin/rooms/#{room}"}
+      method="delete"
+      class="p-2 bg-red-500 text-white hover:bg-red-300  rounded-full"
+      data-confirm={"Are you sure to delete room #{room.number} ?"}
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>

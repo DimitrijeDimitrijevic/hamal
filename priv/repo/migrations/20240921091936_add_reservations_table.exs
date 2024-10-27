@@ -3,13 +3,25 @@ defmodule Hamal.Repo.Migrations.AddReservationsTable do
 
   def change do
     create table("reservations") do
-      add :guest_id, references("guests", on_delete: :delete_all), null: false
-      add :check_in, :utc_datetime, null: false
-      add :check_out, :utc_datetime, null: false
-      add :status, :string
-      add :notes, :string
+      add :check_in, :date, null: false
+      add :check_out, :date, null: false
+      add :guaranteed, :boolean
+      add :guest_name, :string
+      add :guest_surname, :string
+      add :contact_number, :string
+      add :contact_email, :string
+      add :company_name, :string
+      add :breakfast, :boolean
+      add :notes, :text
+      add :user_id, :integer
+      add :channel, :string
 
       timestamps(type: :utc_datetime)
     end
+
+    # Indexes for searching by check_in, check_out and both
+    create index(:reservations, [:check_in])
+    create index(:reservations, [:check_out])
+    create index(:reservations, [:check_in, :check_out])
   end
 end

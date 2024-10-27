@@ -7,11 +7,11 @@ defmodule Hamal.Repo.Migrations.AddRoomsTable do
       add :no_of_beds, :integer
       add :price, :integer
       add :notes, :string
-      add :status, :string
+      add :status, :integer
 
       timestamps(type: :utc_datetime)
     end
 
-    create index("rooms", [:number])
+    create index(:rooms, [:number])
   end
 end

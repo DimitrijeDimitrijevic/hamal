@@ -3,7 +3,8 @@ defmodule HamalWeb.Admin.RoomController do
   alias Hamal.Bookings
 
   def index(conn, _) do
-    render(conn, :index)
+    rooms = Bookings.get_all_rooms()
+    render(conn, :index, rooms: rooms)
   end
 
   def new(conn, _) do

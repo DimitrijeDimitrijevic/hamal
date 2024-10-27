@@ -2,8 +2,8 @@ defmodule Hamal.Bookings.Room do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @fields [:number, :no_of_beds, :price, :notes]
-  @required_fields [:number, :no_of_beds, :price]
+  @permitted [:number, :no_of_beds, :price, :notes]
+  @required [:number, :no_of_beds, :price]
 
   schema "rooms" do
     field :number, :integer
@@ -13,17 +13,14 @@ defmodule Hamal.Bookings.Room do
     # Statuses: available, booked, occupied, under_maintenance, out_of_order
     # Statuses are set and updated by the hotel staff and in CSV form
     field :status, :integer, default: 0
+    many_to_many :reservations, Hamal.Bookings.Reservation, join_through: "reservations_rooms"
 
     timestamps(type: :utc_datetime)
   end
 
   def changeset(room, params \\ %{}) do
     room
-    |> cast(params, @fields)
-    |> validate_required(@required_fields)
-    |> validate_number(:number, greater_than: 0)
-    |> validate_number(:no_of_beds, greater_than: 0)
-    |> validate_number(:price, greater_than: 0)
+    |> cast(params, @permitted)
   end
 
   def map_statuses(status) do

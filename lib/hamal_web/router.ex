@@ -65,6 +65,8 @@ defmodule HamalWeb.Router do
     live_session :admin, layout: {HamalWeb.Layouts, :admin} do
       live "/guests", GuestLive.Index, :index
       live "/guests/new", GuestLive.Index, :new
+      live "/reservations", ReservationLive.Index, :index
+      live "/reservations/new", ReservationLive.Index, :new
     end
   end
 

@@ -14,6 +14,7 @@ defmodule HamalWeb.Admin.GuestLive.Index do
   # Live action is coming from the router and assigned in socket
   @impl true
   def handle_params(unsigned_params, _uri, socket) do
+    IO.inspect(socket_assigns: socket.assigns)
     live_action = socket.assigns.live_action
     socket = apply_live_action(unsigned_params, live_action, socket)
     {:noreply, socket}
@@ -25,14 +26,15 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     IO.inspect(socket)
 
     case Guests.create_guest(guest_params) do
-      {:ok, guest} ->
-        IO.puts("created")
-        socket = put_flash(socket, :info, "Guest created successfully")
-        socket = push_patch(socket, to: ~p"/admin/guests")
+      {:ok, _guest} ->
+        socket =
+          socket
+          |> put_flash(:info, "Guest created successfully")
+          |> push_patch(to: ~p"/admin/guests")
+
         {:noreply, socket}
 
       {:error, changeset} ->
-        IO.inspect(error_socket: socket)
         socket = put_flash(socket, :error, "Please correct errors in inputs to continue!")
         socket = assign(socket, guest: to_form(changeset))
         {:noreply, socket}
@@ -47,6 +49,7 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     countries = Constants.all_countries()
 
     socket
+    |> assign(msg: "NEW")
     |> assign(title: "Add New Guest")
     |> assign(action: action)
     |> assign(doc_types: doc_types)

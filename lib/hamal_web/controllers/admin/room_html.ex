@@ -12,4 +12,6 @@ defmodule HamalWeb.Admin.RoomHTML do
       {"out of order", 4}
     ]
   end
+
+  def room_status(room_status), do: Hamal.Bookings.Room.map_statuses(room_status)
 end

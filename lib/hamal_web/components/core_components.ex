@@ -19,7 +19,7 @@ defmodule HamalWeb.CoreComponents do
   alias Phoenix.LiveView.JS
   import HamalWeb.Gettext
 
-  ## My own components for reusing same
+  ## My own components
 
   slot :inner_block, required: true
 
@@ -237,7 +237,7 @@ defmodule HamalWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-10 space-y-8 bg-white">
+      <div class="mt-6 space-y-2 bg-white">
         <%= render_slot(@inner_block, f) %>
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-4">
           <%= render_slot(action, f) %>
@@ -349,7 +349,7 @@ defmodule HamalWeb.CoreComponents do
 
     ~H"""
     <div>
-      <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
+      <label class="flex items-center gap-4 text-md leading-6 text-zinc-600">
         <input type="hidden" name={@name} value="false" disabled={@rest[:disabled]} />
         <input
           type="checkbox"

@@ -1,0 +1,65 @@
+<%= if @action not in [:new, :edit] do %>
+  INDEX PAGE with all the reservations for future dates,
+  old reservations should have separate view
+<% else %>
+  <div class="mx-auto max-w-xl">
+    <.simple_form for={@reservation} phx-change="validate" phx-submit="save">
+      <.input field={@reservation[:guest_name]} type="text" label="Name" field_required={true} />
+      <.input
+        field={@reservation[:guest_surname]}
+        type="text"
+        label="Surname"
+        field_required={true}
+      />
+      <.input field={@reservation[:check_in]} type="date" label="Check in" field_required={true} />
+      <.input
+        field={@reservation[:check_out]}
+        type="date"
+        label="Check out"
+        field_required={true}
+      />
+      <.inputs_for :let={room} field={@reservation[:rooms]}>
+        <.input
+          field={room[:room_id]}
+          type="select"
+          label="Select room/s"
+          options={@rooms}
+          field_required={true}
+        />
+        <label class="text-red-500 p-1 pr-2 mr-4 rounded-full border border-red-500 cursor-pointer">
+          <.icon name="hero-minus-circle" />
+          <input
+            class="hidden"
+            type="checkbox"
+            name="reservation[room_delete][]"
+            value={room.index}
+          /> Delete
+        </label>
+      </.inputs_for>
+      <label class="text-green-500 p-1 pr-2 rounded-full border border-green-500 cursor-pointer">
+        <.icon name="hero-plus-circle" />
+        <input class="hidden" type="checkbox" name="reservation[room_order][]" /> Add
+      </label>
+      <.input type="checkbox" name="Breakfast" label="Breakfast" />
+      <.input type="email" label="Email" field={@reservation[:contact_email]} />
+      <.input type="tel" label="Phone number" field={@reservation[:contact_number]} />
+      <.input
+        type="select"
+        label="Channel"
+        field={@reservation[:channel]}
+        options={["walk-in", "booking"]}
+      />
+      <.input type="textarea" field={@reservation[:notes]} label="Notes" />
+
+      <:actions>
+        <.button class="w-1/2">Create</.button>
+        <.link
+          href={~p"/admin/reservations"}
+          class="text-white bg-red-500 hover:bg-red-400 w-1/2 text-center rounded-lg py-2 px-3 font-semibold"
+        >
+          Cancel
+        </.link>
+      </:actions>
+    </.simple_form>
+  </div>
+<% end %>
