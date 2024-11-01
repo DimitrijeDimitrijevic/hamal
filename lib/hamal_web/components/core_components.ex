@@ -237,7 +237,7 @@ defmodule HamalWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-6 space-y-2 bg-white">
+      <div class="mt-6 space-y-4 bg-white">
         <%= render_slot(@inner_block, f) %>
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-4">
           <%= render_slot(action, f) %>
@@ -349,7 +349,7 @@ defmodule HamalWeb.CoreComponents do
 
     ~H"""
     <div>
-      <label class="flex items-center gap-4 text-md leading-6 text-zinc-600">
+      <label class="flex items-center gap-4 text-md leading-6 text-zinc-600 my-8">
         <input type="hidden" name={@name} value="false" disabled={@rest[:disabled]} />
         <input
           type="checkbox"
@@ -373,7 +373,7 @@ defmodule HamalWeb.CoreComponents do
   def input(%{type: "select"} = assigns) do
     ~H"""
     <div>
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id} field_required={@field_required}><%= @label %></.label>
       <select
         id={@id}
         name={@name}
@@ -384,9 +384,6 @@ defmodule HamalWeb.CoreComponents do
         <option :if={@prompt} value=""><%= @prompt %></option>
         <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
       </select>
-      <%= if @field_required do %>
-        <.required></.required>
-      <% end %>
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
@@ -395,7 +392,7 @@ defmodule HamalWeb.CoreComponents do
   def input(%{type: "textarea"} = assigns) do
     ~H"""
     <div>
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id} field_required={@field_required}><%= @label %></.label>
       <textarea
         id={@id}
         name={@name}
@@ -406,9 +403,6 @@ defmodule HamalWeb.CoreComponents do
         ]}
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
-      <%= if @field_required do %>
-        <.required></.required>
-      <% end %>
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
@@ -418,7 +412,7 @@ defmodule HamalWeb.CoreComponents do
   def input(assigns) do
     ~H"""
     <div>
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id} field_required={@field_required}><%= @label %></.label>
       <input
         type={@type}
         name={@name}
@@ -431,9 +425,7 @@ defmodule HamalWeb.CoreComponents do
         ]}
         {@rest}
       />
-      <%= if @field_required do %>
-        <.required></.required>
-      <% end %>
+
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
@@ -443,11 +435,15 @@ defmodule HamalWeb.CoreComponents do
   Renders a label.
   """
   attr :for, :string, default: nil
+  attr :field_required, :boolean, default: false
   slot :inner_block, required: true
 
   def label(assigns) do
     ~H"""
     <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
+      <%= if @field_required do %>
+        <span class="text-md text-red-500">*</span>
+      <% end %>
       <%= render_slot(@inner_block) %>
     </label>
     """

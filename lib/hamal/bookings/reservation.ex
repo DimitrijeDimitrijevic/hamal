@@ -10,6 +10,7 @@ defmodule Hamal.Bookings.Reservation do
     :guest_name,
     :guest_surname,
     :company_name,
+    :company_vat,
     :breakfast,
     :notes,
     :user_id,
@@ -18,7 +19,7 @@ defmodule Hamal.Bookings.Reservation do
     :contact_email,
     :company_name
   ]
-  @required [:check_in, :check_out, :guest_name, :guest_surname, :contact_number, :contact_email]
+  @required [:check_in, :check_out, :guest_name, :guest_surname, :contact_number, :channel]
 
   schema "reservations" do
     field :check_in, :date
@@ -28,7 +29,10 @@ defmodule Hamal.Bookings.Reservation do
     field :guest_surname, :string
     field :contact_number, :string
     field :contact_email, :string
-    field :company_name, :string
+    # Company should be optional
+    # If values are present in field the company shoudl be created
+    field :company_name, :string, virtual: true
+    field :company_vat, :string, virtual: true
     field :breakfast, :boolean, default: false
     field :notes, :string
     # Which user created this reservation, nil if created by admin
@@ -37,6 +41,7 @@ defmodule Hamal.Bookings.Reservation do
     # We will set predefined values for channels such as
     # [Walk-in, Booking, Phone, Email, Website, Click & Book, Other]
     field :channel, :string
+    belongs_to :company, Hamal.Bookings.Company
 
     # Relationship to rooms, trough join table on database level
     many_to_many :rooms, Hamal.Bookings.Room,
@@ -58,6 +63,13 @@ defmodule Hamal.Bookings.Reservation do
       sort_param: :room_order,
       drop_param: :room_delete
     )
+  end
+
+  def create_changeset(reservation, rooms, params \\ %{}) do
+    reservation
+    |> cast(params, @permitted)
+    |> validate_required(@required)
+    |> put_assoc(:rooms, rooms)
   end
 
   # on new we do not have any rooms present in reservation

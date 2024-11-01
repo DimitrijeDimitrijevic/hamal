@@ -7,4 +7,8 @@ defmodule Hamal.Helpers.Constants do
   def all_countries() do
     CldrHelper.generate_countries_list()
   end
+
+  def reservation_channel_types do
+    ["walk-in", "booking", "phone", "email", "website"]
+  end
 end

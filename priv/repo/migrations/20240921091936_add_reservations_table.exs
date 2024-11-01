@@ -10,8 +10,6 @@ defmodule Hamal.Repo.Migrations.AddReservationsTable do
       add :guest_surname, :string
       add :contact_number, :string
       add :contact_email, :string
-      add :company_name, :string
-      add :breakfast, :boolean
       add :notes, :text
       add :user_id, :integer
       add :channel, :string

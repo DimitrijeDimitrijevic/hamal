@@ -26,10 +26,8 @@ defmodule Hamal.Bookings.Room do
   def map_statuses(status) do
     case status do
       0 -> "available"
-      1 -> "booked"
-      2 -> "occupied"
-      3 -> "under maintenance"
-      4 -> "out of order"
+      1 -> "under maintenance"
+      2 -> "out of order"
       _ -> "unknown"
     end
   end
