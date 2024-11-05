@@ -19,14 +19,30 @@
         phx-change="check-in-change"
       />
       <.input
+        field={@reservation[:no_of_nights]}
+        type="number"
+        label="Number of nights"
+        field_required={true}
+        min="1"
+        max="30"
+      />
+      <.input
         field={@reservation[:check_out]}
         type="date"
         label="Check out"
         field_required={true}
       />
       <%= if @room_error do %>
-        <.error>Please select at least one room for reservation.</.error>
+        <.error><%= @room_error_message %></.error>
       <% end %>
+      <!-- Begin Add Button -->
+      <div class="grid">
+        <label class="text-green-500 w-1/3 p-1 pr-2 rounded-full border border-green-500 cursor-pointer">
+          <.icon name="hero-plus-circle" />
+          <input class="hidden" type="checkbox" name="reservation[room_order][]" /> Add Room
+        </label>
+      </div>
+      <!-- End Add Button -->
       <.inputs_for :let={room} field={@reservation[:rooms]}>
         <div class="grid grid-cols-2">
           <.input
@@ -43,20 +59,12 @@
                 class="hidden"
                 type="checkbox"
                 name="reservation[room_delete][]"
-                value={room.index || 0}
+                value={room.index}
               /> Delete
             </label>
           </div>
         </div>
       </.inputs_for>
-      <!-- Begin Add Button -->
-      <div class="grid">
-        <label class="text-green-500 w-1/3 p-1 pr-2 rounded-full border border-green-500 cursor-pointer">
-          <.icon name="hero-plus-circle" />
-          <input class="hidden" type="checkbox" name="reservation[room_order][]" /> Add
-        </label>
-      </div>
-      <!-- End Add Button -->
       <.input type="checkbox" name="breakfast" label="Breakfast" />
       <.input type="email" label="Email" field={@reservation[:contact_email]} />
       <.input type="tel" label="Phone number" field={@reservation[:contact_number]} />

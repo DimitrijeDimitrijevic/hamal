@@ -17,7 +17,8 @@ defmodule Hamal.Bookings.Reservation do
     :channel,
     :contact_number,
     :contact_email,
-    :company_name
+    :company_name,
+    :no_of_nights
   ]
   @required [:check_in, :check_out, :guest_name, :guest_surname, :contact_number, :channel]
 
@@ -41,7 +42,12 @@ defmodule Hamal.Bookings.Reservation do
     # We will set predefined values for channels such as
     # [Walk-in, Booking, Phone, Email, Website, Click & Book, Other]
     field :channel, :string
-    belongs_to :company, Hamal.Bookings.Company
+    # How many nights guest will stay
+    # can be a free form or calculated from check_in and check_out
+    # but should be present in database
+    field :no_of_nights, :integer
+
+    # belongs_to :company, Hamal.Bookings.Company
 
     # Relationship to rooms, trough join table on database level
     many_to_many :rooms, Hamal.Bookings.Room,

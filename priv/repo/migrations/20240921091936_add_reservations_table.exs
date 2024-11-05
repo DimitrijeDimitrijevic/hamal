@@ -13,6 +13,7 @@ defmodule Hamal.Repo.Migrations.AddReservationsTable do
       add :notes, :text
       add :user_id, :integer
       add :channel, :string
+      add :no_of_nights, :integer
 
       timestamps(type: :utc_datetime)
     end
