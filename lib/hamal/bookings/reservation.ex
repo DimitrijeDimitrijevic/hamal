@@ -31,9 +31,9 @@ defmodule Hamal.Bookings.Reservation do
     field :contact_number, :string
     field :contact_email, :string
     # Company should be optional
-    # If values are present in field the company shoudl be created
-    field :company_name, :string, virtual: true
-    field :company_vat, :string, virtual: true
+    # If values are present in field the company should be created
+    field :company_name, :string
+    field :company_vat, :string
     field :breakfast, :boolean, default: false
     field :notes, :string
     # Which user created this reservation, nil if created by admin
@@ -47,6 +47,7 @@ defmodule Hamal.Bookings.Reservation do
     # but should be present in database
     field :no_of_nights, :integer
 
+    ## TODO: Lets think about this
     # belongs_to :company, Hamal.Bookings.Company
 
     # Relationship to rooms, trough join table on database level

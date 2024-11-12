@@ -11,13 +11,7 @@
         label="Surname"
         field_required={true}
       />
-      <.input
-        field={@reservation[:check_in]}
-        type="date"
-        label="Check in"
-        field_required={true}
-        phx-change="check-in-change"
-      />
+      <.input field={@reservation[:check_in]} type="date" label="Check in" field_required={true} />
       <.input
         field={@reservation[:no_of_nights]}
         type="number"
@@ -25,6 +19,7 @@
         field_required={true}
         min="1"
         max="30"
+        value={if is_nil(@reservation[:no_of_nights]), do: @reservation[:no_of_nights], else: 0}
       />
       <.input
         field={@reservation[:check_out]}

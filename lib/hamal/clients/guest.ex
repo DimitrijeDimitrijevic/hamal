@@ -1,7 +1,8 @@
-defmodule Hamal.Guests.Guest do
+defmodule Hamal.Clients.Guest do
   use Ecto.Schema
   import Ecto.Changeset
   alias Hamal.Helpers.Constants, as: Constants
+  alias Hamal.Helpers.Changeset
 
   @doc_types Constants.doc_types()
 
@@ -42,6 +43,7 @@ defmodule Hamal.Guests.Guest do
     field :document_number, :string
     field :document_type, :string
     field :birth_date, :date
+    belongs_to :company, Hamal.Clients.Company
 
     timestamps(type: :utc_datetime)
   end
@@ -53,5 +55,12 @@ defmodule Hamal.Guests.Guest do
     |> validate_format(:email, ~r/@/)
     # |> validate_format(:phone, ~r/\d{9,}/)
     |> validate_inclusion(:document_type, @doc_types)
+  end
+
+  def changeset_from_reservation(guest, params \\ %{}) do
+    guest
+    |> cast(params, [:name, :surname])
+    |> Changeset.normalize_name(:name)
+    |> Changeset.normalize_name(:surname)
   end
 end

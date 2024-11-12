@@ -73,17 +73,23 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     end
   end
 
+
+  ### Update available rooms based on dates
+
   @impl true
-  def handle_event("check-in-change", unsigned_params, socket) do
-    # Get date of check-in and get available rooms from reservations on that date
-    # then exclude those rooms from the list of rooms which is in assigns
-    {:noreply, socket}
+  def handle_event("check-in-change", %{"reservation" => %{"check_in" => check_in}} , socket) do
+    check_in = Date.from_iso8601!(check_in)
+    {:noreply, socket |> assign(check_in: check_in)}
   end
 
-  # @impl true
-  # def handle_event("check-out-change", unsigned_params, socket) do
-  #   {:noreply, socket}
-  # end
+  @impl true
+  def handle_event("check-out-change", %{"reservation" => %{"check_out" => check_out}}, socket) do
+    check_out = Date.from_iso8601!(check_out)
+    {:noreply, socket |> assign(check_out: check_out)}
+  end
+
+
+  ################################################
 
   #### NEW ACTION ####
   defp apply_live_action(_params, :new, socket) do
@@ -168,4 +174,16 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     do: {true, "Please select at least one room per reservation"}
 
   defp handle_room_error({:ok, _}), do: {false, ""}
+
+
+  # defp calculate_number_of_nights(nil, nil), do: nil
+  # defp calculate_number_of_nights(nil, _), do: nil
+  # defp calculate_number_of_nights(_, nil), do: nil
+  # defp calculate_number_of_nights(%Date{} = check_in, %Date{} = check_out), do: Date.diff(check_out, check_in)
+  # defp calculate_number_of_nights(check_in, check_out) do
+  #   check_in = Date.from_iso8601!(check_in)
+  #   check_out = Date.from_iso8601!(check_out)
+  #   Date.diff(check_out, check_in)
+  # end
+
 end

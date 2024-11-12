@@ -2,6 +2,8 @@ defmodule Hamal.Bookings do
   import Ecto.Query
   alias Hamal.Repo
   alias Hamal.Bookings.{Reservation, Room}
+  alias Hamal.Clients
+  alias Hamal.Clients.Guest
 
   def new_room() do
     %Room{}
@@ -39,9 +41,13 @@ defmodule Hamal.Bookings do
 
   def create_reservation(params, room_ids) do
     rooms = get_rooms_by_ids(room_ids)
+    guest = Clients.get_guest(params["guest_name"], params["guest_surname"])
+    company = Clients.get_company(params["company_vat"])
+  end
 
+  defp reservation_multi(reservation_params, rooms, guest, company) do
     %Reservation{}
-    |> Reservation.create_changeset(rooms, params)
+    |> Reservation.create_changeset(rooms, reservation_params)
     |> Repo.insert()
   end
 

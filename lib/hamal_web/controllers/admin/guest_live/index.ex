@@ -1,6 +1,6 @@
 defmodule HamalWeb.Admin.GuestLive.Index do
   use HamalWeb, :live_view
-  alias Hamal.Guests.Guest
+  alias Hamal.Clients.Guest
   alias Hamal.Guests
   alias Hamal.Helpers.Constants
 
@@ -80,6 +80,6 @@ defmodule HamalWeb.Admin.GuestLive.Index do
   defp guest_data(:edit, guest_id) do
     Guest.get_guest(guest_id)
     |> Guest.changeset()
-    |> to_form()
+    |> to_form(action: :validate)
   end
 end
