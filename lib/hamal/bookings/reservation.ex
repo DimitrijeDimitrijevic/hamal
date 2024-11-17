@@ -2,6 +2,7 @@ defmodule Hamal.Bookings.Reservation do
   use Ecto.Schema
   import Ecto.Changeset
   alias Hamal.Bookings.Room
+  alias Hamal.Helpers.Changeset
 
   @permitted [
     :check_in,
@@ -18,7 +19,8 @@ defmodule Hamal.Bookings.Reservation do
     :contact_number,
     :contact_email,
     :company_name,
-    :no_of_nights
+    :no_of_nights,
+    :company_id
   ]
   @required [:check_in, :check_out, :guest_name, :guest_surname, :contact_number, :channel]
 
@@ -48,7 +50,8 @@ defmodule Hamal.Bookings.Reservation do
     field :no_of_nights, :integer
 
     ## TODO: Lets think about this
-    # belongs_to :company, Hamal.Bookings.Company
+    belongs_to :company, Hamal.Clients.Company
+    belongs_to :guest, Hamal.Clients.Guest
 
     # Relationship to rooms, trough join table on database level
     many_to_many :rooms, Hamal.Bookings.Room,
@@ -77,6 +80,8 @@ defmodule Hamal.Bookings.Reservation do
     |> cast(params, @permitted)
     |> validate_required(@required)
     |> put_assoc(:rooms, rooms)
+    |> Changeset.normalize_name(:guest_name)
+    |> Changeset.normalize_name(:guest_surname)
   end
 
   # on new we do not have any rooms present in reservation

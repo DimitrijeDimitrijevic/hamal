@@ -44,6 +44,7 @@ defmodule Hamal.Clients.Guest do
     field :document_type, :string
     field :birth_date, :date
     belongs_to :company, Hamal.Clients.Company
+    has_many :reservations, Hamal.Bookings.Reservation
 
     timestamps(type: :utc_datetime)
   end

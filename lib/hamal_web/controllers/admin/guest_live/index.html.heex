@@ -1,6 +1,12 @@
-<h2><%= @msg %></h2>
 <%= if @action not in [:new, :edit] do %>
-  <p>render table of guests with live search and data list</p>
+  <.table
+    id="guests"
+    rows={@guests}
+    row_click={fn guest -> JS.navigate(~p"/admin/guests/#{guest}") end}
+  >
+    <:col :let={guest} label="Name"><%= guest.name %></:col>
+    <:action></:action>
+  </.table>
 <% else %>
   <.h2><%= @title %></.h2>
   <p>Form for <%= @action %> guests</p>

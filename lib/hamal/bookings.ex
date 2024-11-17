@@ -2,8 +2,8 @@ defmodule Hamal.Bookings do
   import Ecto.Query
   alias Hamal.Repo
   alias Hamal.Bookings.{Reservation, Room}
+  alias Hamal.Clients.{Guest, Company}
   alias Hamal.Clients
-  alias Hamal.Clients.Guest
 
   def new_room() do
     %Room{}
@@ -40,19 +40,57 @@ defmodule Hamal.Bookings do
   end
 
   def create_reservation(params, room_ids) do
-    rooms = get_rooms_by_ids(room_ids)
-    guest = Clients.get_guest(params["guest_name"], params["guest_surname"])
-    company = Clients.get_company(params["company_vat"])
+    reservation_multi(params, room_ids)
+    |> Repo.transaction()
   end
 
-  defp reservation_multi(reservation_params, rooms, guest, company) do
-    %Reservation{}
-    |> Reservation.create_changeset(rooms, reservation_params)
-    |> Repo.insert()
+  defp reservation_multi(reservation_params, rooms_ids) do
+    # First we create reservation, then we check guest and company existance, then we create then if they do not exists
+    # Afterwards we update the reservation with company_id and guest_id if they are present or created.
+    # This will make life easier in future
+    Ecto.Multi.new()
+    |> Ecto.Multi.all(:rooms, get_rooms_by_ids(rooms_ids))
+    |> Ecto.Multi.insert(:reservation, fn %{rooms: rooms} ->
+      Reservation.create_changeset(%Reservation{}, rooms, reservation_params)
+    end)
+    |> Ecto.Multi.run(:guest, fn _repo, %{reservation: reservation} ->
+      guest = Clients.get_guest(reservation.guest_name, reservation.guest_surname)
+
+      if is_nil(guest) do
+        Clients.create_guest(
+          %{name: reservation.guest_name, surname: reservation.guest_surname},
+          :reservation
+        )
+      else
+        {:ok, guest}
+      end
+    end)
+    |> Ecto.Multi.run(:company, fn _repo, %{reservation: reservation} ->
+      company =
+        Clients.get_company_by_vat_and_name(reservation.company_vat, reservation.company_name)
+
+      if is_nil(company) do
+        Clients.create_company(%{name: reservation.company_name, vat: reservation.company_vat},
+          from: :reservation
+        )
+      else
+        {:ok, company}
+      end
+    end)
+    |> Ecto.Multi.update(:updated_reservation, fn %{
+                                                    company: company,
+                                                    guest: guest,
+                                                    reservation: reservation
+                                                  } ->
+      Ecto.Changeset.cast(reservation, %{company_id: company.id, guest_id: guest.id}, [
+        :company_id,
+        :guest_id
+      ])
+    end)
+    |> Ecto.Multi.inspect()
   end
 
   def get_rooms_by_ids(room_ids) do
     from(r in Room, where: r.id in ^room_ids, select: r)
-    |> Repo.all()
   end
 end

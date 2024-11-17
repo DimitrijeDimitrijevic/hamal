@@ -1,4 +1,4 @@
-defmodule Hamal.Guests.Company do
+defmodule Hamal.Clients.Company do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -33,9 +33,15 @@ defmodule Hamal.Guests.Company do
     timestamps(type: :utc_datetime)
   end
 
-  def changeset_from_reservation(company, params \\ %{}) do
+  def changeset(company, params \\ %{}) do
     company
     |> cast(params, @permitted)
     |> validate_required(@required)
+  end
+
+  def changeset_from_reservation(company, params \\ %{}) do
+    company
+    |> cast(params, @permitted)
+    |> validate_required([:name])
   end
 end

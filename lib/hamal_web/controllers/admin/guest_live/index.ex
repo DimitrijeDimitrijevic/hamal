@@ -1,7 +1,7 @@
 defmodule HamalWeb.Admin.GuestLive.Index do
   use HamalWeb, :live_view
   alias Hamal.Clients.Guest
-  alias Hamal.Guests
+  alias Hamal.Clients
   alias Hamal.Helpers.Constants
 
   @impl true
@@ -13,18 +13,15 @@ defmodule HamalWeb.Admin.GuestLive.Index do
   # Unsigned params are the params that are coming trought url/forms etc
   # Live action is coming from the router and assigned in socket
   @impl true
-  def handle_params(unsigned_params, _uri, socket) do
-    IO.inspect(socket_assigns: socket.assigns)
+  def handle_params(params, _uri, socket) do
     live_action = socket.assigns.live_action
-    socket = apply_live_action(unsigned_params, live_action, socket)
+    socket = apply_live_action(params, live_action, socket)
     {:noreply, socket}
   end
 
   # Handle events from the client
   @impl true
   def handle_event("save", %{"action" => "new", "guest" => guest_params}, socket) do
-    IO.inspect(socket)
-
     case Guests.create_guest(guest_params) do
       {:ok, _guest} ->
         socket =
@@ -41,6 +38,21 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     end
   end
 
+  @impl true
+  def handle_event("save", %{"action" => "edit", "guest" => guest_params}, socket) do
+    guest = socket.assigns.guest_object
+
+    case Clients.update_guest(guest, guest_params) do
+      {:ok, guest} ->
+        IO.inspect(guest)
+        {:noreply, socket}
+
+      {:error, changeset} ->
+        IO.inspect(changeset)
+        {:noreply, socket}
+    end
+  end
+
   # Helper functions
 
   # applying live action from router with fields
@@ -49,7 +61,6 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     countries = Constants.all_countries()
 
     socket
-    |> assign(msg: "NEW")
     |> assign(title: "Add New Guest")
     |> assign(action: action)
     |> assign(doc_types: doc_types)
@@ -57,10 +68,26 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     |> assign(guest: guest_data(action))
   end
 
-  defp apply_live_action(_params, :index = action, socket) do
+  defp apply_live_action(_params, :index, socket) do
+    guests = Clients.get_all_guests()
+
     socket
-    |> assign(action: action)
-    |> assign(guests: [])
+    |> assign(action: :index)
+    |> assign(guests: guests)
+  end
+
+  defp apply_live_action(%{"id" => id}, :edit, socket) do
+    {form, guest} = guest_form(:edit, id)
+    doc_types = Constants.doc_types()
+    countries = Constants.all_countries()
+
+    socket
+    |> assign(doc_types: doc_types)
+    |> assign(countries: countries)
+    |> assign(title: "Edit Guest")
+    |> assign(action: :edit)
+    |> assign(guest_object: guest)
+    |> assign(guest: form)
   end
 
   defp apply_live_action(_params, _action, socket) do
@@ -74,12 +101,17 @@ defmodule HamalWeb.Admin.GuestLive.Index do
   defp guest_data(:new) do
     %Guest{}
     |> Guest.changeset(%{})
-    |> to_form()
+    |> to_form(action: :validate)
   end
 
-  defp guest_data(:edit, guest_id) do
-    Guest.get_guest(guest_id)
-    |> Guest.changeset()
-    |> to_form(action: :validate)
+  defp guest_form(:edit, guest_id) do
+    guest = Clients.get_guest(guest_id)
+
+    form =
+      guest
+      |> Guest.changeset()
+      |> to_form(action: :validate)
+
+    {form, guest}
   end
 end
