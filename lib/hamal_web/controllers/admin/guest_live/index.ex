@@ -53,6 +53,12 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     end
   end
 
+  @impl true
+  def handle_event("validate", unsigned_params, socket) do
+    IO.inspect(unsigned_params)
+    {:noreply, socket}
+  end
+
   # Helper functions
 
   # applying live action from router with fields

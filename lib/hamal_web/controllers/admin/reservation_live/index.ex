@@ -3,6 +3,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   alias Hamal.Bookings
   alias Hamal.Bookings.Reservation
   alias Hamal.Helpers.Constants
+  alias Hamal.Helpers.Reservation.Helper
 
   @impl true
   def mount(_params, _session, socket) do
@@ -73,24 +74,6 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     end
   end
 
-
-  ### Update available rooms based on dates
-
-  @impl true
-  def handle_event("check-in-change", %{"reservation" => %{"check_in" => check_in}} , socket) do
-    check_in = Date.from_iso8601!(check_in)
-    {:noreply, socket |> assign(check_in: check_in)}
-  end
-
-  @impl true
-  def handle_event("check-out-change", %{"reservation" => %{"check_out" => check_out}}, socket) do
-    check_out = Date.from_iso8601!(check_out)
-    {:noreply, socket |> assign(check_out: check_out)}
-  end
-
-
-  ################################################
-
   #### NEW ACTION ####
   defp apply_live_action(_params, :new, socket) do
     reservation = Bookings.new_reservation() |> to_form()
@@ -120,9 +103,25 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   #########################
 
   defp validate_reservation_form(reservation_params) do
+    date_params =
+      handle_no_of_nights(
+        reservation_params["check_in"],
+        reservation_params["check_out"],
+        reservation_params["no_of_nights"]
+      )
+
+    reservation_params = update_dates_params(reservation_params, date_params)
+
     %Reservation{}
     |> Reservation.validation_changeset(reservation_params)
     |> to_form(action: :validate)
+  end
+
+  defp update_dates_params(reservation_params, {check_in, check_out, no_of_nights}) do
+    reservation_params
+    |> Map.put("check_in", check_in)
+    |> Map.put("check_out", check_out)
+    |> Map.put("no_of_nights", no_of_nights)
   end
 
   defp validate_rooms_selection(room_params) do
@@ -175,15 +174,44 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
   defp handle_room_error({:ok, _}), do: {false, ""}
 
+  defp handle_no_of_nights(check_in, "", ""), do: {check_in, nil, nil}
 
-  # defp calculate_number_of_nights(nil, nil), do: nil
-  # defp calculate_number_of_nights(nil, _), do: nil
-  # defp calculate_number_of_nights(_, nil), do: nil
-  # defp calculate_number_of_nights(%Date{} = check_in, %Date{} = check_out), do: Date.diff(check_out, check_in)
-  # defp calculate_number_of_nights(check_in, check_out) do
-  #   check_in = Date.from_iso8601!(check_in)
-  #   check_out = Date.from_iso8601!(check_out)
-  #   Date.diff(check_out, check_in)
-  # end
+  defp handle_no_of_nights(check_in, check_out, "") do
+    {check_in, check_out} = Helper.check_in_check_out_to_dates(check_in, check_out)
+    no_of_nights = calculate_number_of_nights(check_in, check_out)
 
+    {Date.to_string(check_in), Date.to_string(check_out), no_of_nights}
+  end
+
+  defp handle_no_of_nights(check_in, "", no_of_nights) do
+    no_of_nights = String.to_integer(no_of_nights)
+    {check_in, _} = Helper.check_in_check_out_to_dates(check_in, nil)
+    check_out = check_in |> Date.shift(day: no_of_nights) |> Date.to_string()
+    {check_in, check_out, no_of_nights}
+  end
+
+  defp handle_no_of_nights(check_in, check_out, no_of_nights)
+       when check_out != "" or not is_nil(check_out) do
+    {check_in, check_out} = Helper.check_in_check_out_to_dates(check_in, check_out)
+    no_of_nights = String.to_integer(no_of_nights)
+    new_dif_days = Date.diff(check_out, check_in)
+
+    {check_out, no_of_nights} =
+      if no_of_nights != new_dif_days do
+        {check_out, calculate_number_of_nights(check_in, check_out)}
+      else
+        check_out = check_in |> Date.shift(day: no_of_nights)
+        no_of_nights = calculate_number_of_nights(check_in, check_out)
+        {check_out, no_of_nights}
+      end
+
+    {check_in, check_out, no_of_nights}
+  end
+
+  defp calculate_number_of_nights(check_in, check_out) do
+    case Date.diff(check_out, check_in) do
+      0 -> 1
+      no_of_nights -> no_of_nights
+    end
+  end
 end

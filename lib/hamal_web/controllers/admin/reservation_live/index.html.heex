@@ -19,7 +19,6 @@
         field_required={true}
         min="1"
         max="30"
-        value={if is_nil(@reservation[:no_of_nights]), do: @reservation[:no_of_nights], else: 0}
       />
       <.input
         field={@reservation[:check_out]}
