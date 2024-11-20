@@ -3,7 +3,6 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   alias Hamal.Bookings
   alias Hamal.Bookings.Reservation
   alias Hamal.Helpers.Constants
-  alias Hamal.Helpers.Reservation.Helper
 
   @impl true
   def mount(_params, _session, socket) do
@@ -56,12 +55,24 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
       case Bookings.create_reservation(params, room_ids) do
         {:ok, reservation} ->
+          Hamal.Emails.Bookings.confirmation_email(reservation)
+          |> Hamal.Mailer.deliver()
+
           socket =
             socket
             |> put_flash(:info, "Reservation created successfully!")
             |> push_patch(to: ~p"/admin/reservations")
 
           {:noreply, socket}
+
+        {:error, :other_failure} ->
+          socket =
+            socket
+            |> put_flash(
+              :error,
+              "An error occurred while creating reservation. Please contact support!"
+            )
+            |> push_patch(to: ~p"/admin/reservations")
 
         {:error, changeset} ->
           socket =

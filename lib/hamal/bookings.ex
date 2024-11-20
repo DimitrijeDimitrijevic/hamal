@@ -40,8 +40,20 @@ defmodule Hamal.Bookings do
   end
 
   def create_reservation(params, room_ids) do
-    reservation_multi(params, room_ids)
-    |> Repo.transaction()
+    result =
+      reservation_multi(params, room_ids)
+      |> Repo.transaction()
+
+    case result do
+      {:ok, %{reservation: reservation}} ->
+        {:ok, reservation}
+
+      {:error, operation, changeset, changes} ->
+        case operation do
+          :reservation -> {:error, changeset}
+          _ -> {:error, :other_failure}
+        end
+    end
   end
 
   defp reservation_multi(reservation_params, rooms_ids) do
@@ -50,10 +62,10 @@ defmodule Hamal.Bookings do
     # This will make life easier in future
     Ecto.Multi.new()
     |> Ecto.Multi.all(:rooms, get_rooms_by_ids(rooms_ids))
-    |> Ecto.Multi.insert(:reservation, fn %{rooms: rooms} ->
+    |> Ecto.Multi.insert(:new_reservation, fn %{rooms: rooms} ->
       Reservation.create_changeset(%Reservation{}, rooms, reservation_params)
     end)
-    |> Ecto.Multi.run(:guest, fn _repo, %{reservation: reservation} ->
+    |> Ecto.Multi.run(:guest, fn _repo, %{new_reservation: reservation} ->
       guest = Clients.get_guest(reservation.guest_name, reservation.guest_surname)
 
       if is_nil(guest) do
@@ -65,7 +77,7 @@ defmodule Hamal.Bookings do
         {:ok, guest}
       end
     end)
-    |> Ecto.Multi.run(:company, fn _repo, %{reservation: reservation} ->
+    |> Ecto.Multi.run(:company, fn _repo, %{new_reservation: reservation} ->
       company =
         Clients.get_company_by_vat_and_name(reservation.company_vat, reservation.company_name)
 
@@ -77,11 +89,11 @@ defmodule Hamal.Bookings do
         {:ok, company}
       end
     end)
-    |> Ecto.Multi.update(:updated_reservation, fn %{
-                                                    company: company,
-                                                    guest: guest,
-                                                    reservation: reservation
-                                                  } ->
+    |> Ecto.Multi.update(:reservation, fn %{
+                                            company: company,
+                                            guest: guest,
+                                            new_reservation: reservation
+                                          } ->
       Ecto.Changeset.cast(reservation, %{company_id: company.id, guest_id: guest.id}, [
         :company_id,
         :guest_id

@@ -73,7 +73,7 @@
       <.input type="textarea" field={@reservation[:notes]} label="Notes" />
 
       <:actions>
-        <.button class="w-1/2">Create</.button>
+        <.button phx-disable-with="Creating reservation..." class="w-1/2">Create</.button>
         <.link
           href={~p"/admin/reservations"}
           class="text-white bg-red-500 hover:bg-red-400 w-1/2 text-center rounded-lg py-2 px-3 font-semibold"
