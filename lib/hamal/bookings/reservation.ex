@@ -73,7 +73,6 @@ defmodule Hamal.Bookings.Reservation do
       sort_param: :room_order,
       drop_param: :room_delete
     )
-    |> IO.inspect()
     |> handle_number_of_nights()
   end
 
@@ -84,6 +83,7 @@ defmodule Hamal.Bookings.Reservation do
     |> put_assoc(:rooms, rooms)
     |> Changeset.normalize_name(:guest_name)
     |> Changeset.normalize_name(:guest_surname)
+    |> handle_check_in_check_out_dates()
   end
 
   # on new we do not have any rooms present in reservation
@@ -137,4 +137,23 @@ defmodule Hamal.Bookings.Reservation do
   end
 
   defp handle_number_of_nights(changeset), do: changeset
+
+  defp handle_check_in_check_out_dates(cs_map, today \\ Date.utc_today())
+
+  defp handle_check_in_check_out_dates(cs, today) do
+    check_in = get_field(cs, :check_in)
+    check_out = get_field(cs, :check_out)
+
+    check_in_past = Date.compare(check_in, today) == :lt
+    check_out_past = Date.compare(check_out, today) == :lt
+
+    cs =
+      if check_in_past,
+        do: add_error(cs, :check_in, "Check in date can not be in the past"),
+        else: cs
+
+    if check_out_past,
+      do: add_error(cs, :check_out, "Check out date can not be in the past"),
+      else: cs
+  end
 end
