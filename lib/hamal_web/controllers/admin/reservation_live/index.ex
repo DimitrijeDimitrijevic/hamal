@@ -103,15 +103,6 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   #########################
 
   defp validate_reservation_form(reservation_params) do
-    date_params =
-      handle_no_of_nights(
-        reservation_params["check_in"],
-        reservation_params["check_out"],
-        reservation_params["no_of_nights"]
-      )
-
-    reservation_params = update_dates_params(reservation_params, date_params)
-
     %Reservation{}
     |> Reservation.validation_changeset(reservation_params)
     |> to_form(action: :validate)
@@ -173,45 +164,4 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     do: {true, "Please select at least one room per reservation"}
 
   defp handle_room_error({:ok, _}), do: {false, ""}
-
-  defp handle_no_of_nights(check_in, "", ""), do: {check_in, nil, nil}
-
-  defp handle_no_of_nights(check_in, check_out, "") do
-    {check_in, check_out} = Helper.check_in_check_out_to_dates(check_in, check_out)
-    no_of_nights = calculate_number_of_nights(check_in, check_out)
-
-    {Date.to_string(check_in), Date.to_string(check_out), no_of_nights}
-  end
-
-  defp handle_no_of_nights(check_in, "", no_of_nights) do
-    no_of_nights = String.to_integer(no_of_nights)
-    {check_in, _} = Helper.check_in_check_out_to_dates(check_in, nil)
-    check_out = check_in |> Date.shift(day: no_of_nights) |> Date.to_string()
-    {check_in, check_out, no_of_nights}
-  end
-
-  defp handle_no_of_nights(check_in, check_out, no_of_nights)
-       when check_out != "" or not is_nil(check_out) do
-    {check_in, check_out} = Helper.check_in_check_out_to_dates(check_in, check_out)
-    no_of_nights = String.to_integer(no_of_nights)
-    new_dif_days = Date.diff(check_out, check_in)
-
-    {check_out, no_of_nights} =
-      if no_of_nights != new_dif_days do
-        {check_out, calculate_number_of_nights(check_in, check_out)}
-      else
-        check_out = check_in |> Date.shift(day: no_of_nights)
-        no_of_nights = calculate_number_of_nights(check_in, check_out)
-        {check_out, no_of_nights}
-      end
-
-    {check_in, check_out, no_of_nights}
-  end
-
-  defp calculate_number_of_nights(check_in, check_out) do
-    case Date.diff(check_out, check_in) do
-      0 -> 1
-      no_of_nights -> no_of_nights
-    end
-  end
 end

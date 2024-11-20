@@ -73,6 +73,8 @@ defmodule Hamal.Bookings.Reservation do
       sort_param: :room_order,
       drop_param: :room_delete
     )
+    |> IO.inspect()
+    |> handle_number_of_nights()
   end
 
   def create_changeset(reservation, rooms, params \\ %{}) do
@@ -95,4 +97,44 @@ defmodule Hamal.Bookings.Reservation do
     rooms = [%Room{}]
     put_change(changeset, :rooms, rooms)
   end
+
+  # Handling number of nights and checkout date based on user input
+  # from form, it is dynamic, so changing number of nights will change check_out dates
+  # and vice versa
+  defp handle_number_of_nights(
+         %{
+           changes: %{
+             check_in: current_check_in,
+             check_out: current_check_out,
+             no_of_nights: no_of_nights
+           }
+         } = cs
+       ) do
+    no_of_nights_diff = Date.diff(current_check_out, current_check_in)
+    check_out = Date.shift(current_check_in, day: no_of_nights)
+
+    no_of_nights = if no_of_nights_diff != no_of_nights, do: no_of_nights_diff, else: no_of_nights
+    no_of_nights = if no_of_nights == 0, do: 1, else: no_of_nights
+
+    cs
+    |> put_change(:no_of_nights, no_of_nights)
+    |> put_change(:check_out, check_out)
+  end
+
+  defp handle_number_of_nights(%{changes: %{check_in: check_in, check_out: check_out}} = cs) do
+    no_of_nights =
+      case Date.diff(check_out, check_in) do
+        0 -> 1
+        n_nights -> n_nights
+      end
+
+    put_change(cs, :no_of_nights, no_of_nights)
+  end
+
+  defp handle_number_of_nights(%{changes: %{check_in: check_in, no_of_nights: no_of_nights}} = cs) do
+    check_out = Date.shift(check_in, day: no_of_nights)
+    put_change(cs, :check_out, check_out)
+  end
+
+  defp handle_number_of_nights(changeset), do: changeset
 end
