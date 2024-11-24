@@ -20,6 +20,18 @@ defmodule HamalWeb.CoreComponents do
   import HamalWeb.Gettext
 
   ## My own components
+  attr :link, :string, required: true
+  attr :action, :string, required: true
+
+  def add_button(assigns) do
+    ~H"""
+    <div class="my-4">
+      <.link href={@link} class="rounded-full p-3 text-white bg-gray-800 hover:bg-gray-600">
+        <.icon name="hero-plus-circle" /> <%= @action %>
+      </.link>
+    </div>
+    """
+  end
 
   slot :inner_block, required: true
 

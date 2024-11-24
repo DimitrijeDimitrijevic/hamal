@@ -100,6 +100,14 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     |> assign(reservation_channels: reservation_channels)
   end
 
+  defp apply_live_action(_params, :index, socket) do
+    reservations = Bookings.get_all_reservations()
+
+    socket
+    |> assign(action: :index)
+    |> assign(reservations: reservations)
+  end
+
   defp apply_live_action(params, action, socket) do
     socket
     |> assign(action: action)
@@ -117,13 +125,6 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     %Reservation{}
     |> Reservation.validation_changeset(reservation_params)
     |> to_form(action: :validate)
-  end
-
-  defp update_dates_params(reservation_params, {check_in, check_out, no_of_nights}) do
-    reservation_params
-    |> Map.put("check_in", check_in)
-    |> Map.put("check_out", check_out)
-    |> Map.put("no_of_nights", no_of_nights)
   end
 
   defp validate_rooms_selection(room_params) do
@@ -175,4 +176,12 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     do: {true, "Please select at least one room per reservation"}
 
   defp handle_room_error({:ok, _}), do: {false, ""}
+
+  def reserved_rooms([room]), do: "#{room.number}"
+
+  def reserved_rooms(rooms) do
+    Enum.reduce(rooms, "", fn room, acc ->
+      acc <> "#{room.number} "
+    end)
+  end
 end

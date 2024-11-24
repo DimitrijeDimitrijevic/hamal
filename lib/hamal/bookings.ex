@@ -39,6 +39,13 @@ defmodule Hamal.Bookings do
     |> Reservation.new_changeset()
   end
 
+  def get_all_reservations() do
+    Reservation
+    |> order_by([r], asc: r.check_in)
+    |> Repo.all()
+    |> Repo.preload(:rooms)
+  end
+
   def create_reservation(params, room_ids) do
     result =
       reservation_multi(params, room_ids)
