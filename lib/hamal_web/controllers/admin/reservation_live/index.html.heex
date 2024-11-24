@@ -1,9 +1,9 @@
 <%= if @action not in [:new, :edit] do %>
-  <.add_button link={~p"/admin/reservations/new"} action="Create Reservation" />
+  <.add_live_button link={~p"/admin/reservations/new"} action="Create Reservation" />
   <.table id="reservations" rows={@reservations}>
     <:col :let={reservation} label="ID"><%= reservation.id %></:col>
-    <:col :let={reservation} label="Check In"><%= reservation.check_in %></:col>
-    <:col :let={reservation} label="Check Out"><%= reservation.check_out %></:col>
+    <:col :let={reservation} label="Check In"><%= date(reservation.check_in) %></:col>
+    <:col :let={reservation} label="Check Out"><%= date(reservation.check_out) %></:col>
     <:col :let={reservation} label="Name"><%= reservation.guest_name %></:col>
     <:col :let={reservation} label="Surname"><%= reservation.guest_surname %></:col>
     <:col :let={reservation} label="Nights"><%= reservation.no_of_nights %></:col>

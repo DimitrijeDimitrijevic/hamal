@@ -86,7 +86,7 @@ defmodule HamalWeb do
       # Core UI components and translation
       import HamalWeb.CoreComponents
       import HamalWeb.Gettext
-
+      import Hamal.Helpers.Formatting
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
 

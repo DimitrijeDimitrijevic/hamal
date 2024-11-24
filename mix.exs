@@ -61,7 +61,8 @@ defmodule Hamal.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       # Dimitrije added deps
-      {:ex_cldr_territories, "~> 2.9.0"}
+      {:ex_cldr_territories, "~> 2.9.0"},
+      {:timex, "~> 3.7"}
     ]
   end
 
