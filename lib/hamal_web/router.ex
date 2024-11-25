@@ -59,15 +59,14 @@ defmodule HamalWeb.Router do
     resources "/users", UserController
 
     resources "/rooms", RoomController
-    # TO-DO implement
-    # resources "/reservations", RoomController
-    # resources "/receipts", RoomController
+
     live_session :admin, layout: {HamalWeb.Layouts, :admin} do
       live "/guests", GuestLive.Index, :index
       live "/guests/new", GuestLive.Index, :new
       live "/guests/:id", GuestLive.Index, :edit
       live "/reservations", ReservationLive.Index, :index
       live "/reservations/new", ReservationLive.Index, :new
+      live "/reservations/:id/edit", ReservationLive.Index, :edit
     end
   end
 

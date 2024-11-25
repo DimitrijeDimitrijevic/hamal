@@ -1,6 +1,11 @@
-<%= if @action not in [:new, :edit] do %>
+<%= if @action in [:index] do %>
   <.add_live_button link={~p"/admin/reservations/new"} action="Create Reservation" />
-  <.table id="reservations" rows={@reservations}>
+  <.link patch={~p"/admin/reservations/?param=name"}>Sort by name</.link>
+  <.table
+    id="reservations"
+    rows={@reservations}
+    row_click={fn reservation -> JS.patch(~p"/admin/reservations/#{reservation}/edit") end}
+  >
     <:col :let={reservation} label="ID"><%= reservation.id %></:col>
     <:col :let={reservation} label="Check In"><%= date(reservation.check_in) %></:col>
     <:col :let={reservation} label="Check Out"><%= date(reservation.check_out) %></:col>
