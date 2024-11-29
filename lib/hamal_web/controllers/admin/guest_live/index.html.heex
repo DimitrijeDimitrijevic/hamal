@@ -1,36 +1,50 @@
 <%= if @action not in [:new, :edit] do %>
+  <.add_button link={~p"/admin/guests/new"} action="Add new guest" />
+  <input type="text" name="guest_search" phx-click="search" />
   <.table
     id="guests"
     rows={@guests}
     row_click={fn guest -> JS.navigate(~p"/admin/guests/#{guest}") end}
   >
     <:col :let={guest} label="Name"><%= guest.name %></:col>
+    <:col :let={guest} label="Surname"><%= guest.surname %></:col>
+    <:col :let={guest} label="Email"><%= guest.email %></:col>
+    <:col :let={guest} label="Phone"><%= guest.phone %></:col>
+    <:col :let={guest} label="Notes"><%= guest.notes %></:col>
     <:action></:action>
   </.table>
 <% else %>
+  <.live_back_link navigate={~p"/admin/guests"}>Back</.live_back_link>
   <.h2><%= @title %></.h2>
-  <p>Form for <%= @action %> guests</p>
+  <p>Please make sure you always provide correct data.</p>
+  <p>Fields labeled with red asterix are mandatory fields</p>
   <div class="mx-auto max-w-xl">
-    <.simple_form for={@guest} phx-submit="save" phx-value-action={@action}>
-      <.input field={@guest[:name]} label="Name" field_required={true} />
-      <.input field={@guest[:surname]} label="Surname" field_required={true} />
+    <.simple_form for={@guest} phx-submit="save" phx-change="validate" phx-value-action={@action}>
+      <.input field={@guest[:name]} label="Name" field_required={true} placeholder="John" />
+      <.input field={@guest[:surname]} label="Surname" field_required={true} placeholder="Doe" />
       <.input field={@guest[:birth_date]} type="date" label="Date of birth" field_required={true} />
-      <.input field={@guest[:email]} type="email" label="Email" />
-      <.input field={@guest[:phone]} type="tel" label="Phone" />
+      <.input field={@guest[:email]} type="email" label="Email" placeholder="email@gmail.com" />
+      <.input field={@guest[:phone]} type="tel" label="Phone" placeholder="0601234567" />
       <.input
         field={@guest[:country]}
         type="text"
         list="countries"
         label="Country"
         field_required={true}
+        placeholder="Start typing to get the list of countries, e.g Serbia"
       />
       <datalist id="countries">
         <option :for={country <- @countries}>
           <%= country %>
         </option>
       </datalist>
-      <.input field={@guest[:city]} label="City" field_required={true} />
-      <.input field={@guest[:address]} label="Address" field_required={true} />
+      <.input field={@guest[:city]} label="City" field_required={true} placeholder="Leskovac" />
+      <.input
+        field={@guest[:address]}
+        label="Address"
+        field_required={true}
+        placeholder="Street 100"
+      />
       <.input
         field={@guest[:document_type]}
         label="Document type"
@@ -38,13 +52,23 @@
         options={@doc_types}
         field_required={true}
       />
-      <.input field={@guest[:document_number]} label="Document number" field_required={true} />
+      <.input
+        field={@guest[:document_number]}
+        label="Document number"
+        field_required={true}
+        placeholder="xyz1234"
+      />
 
-      <.input field={@guest[:notes]} type="textarea" label="Notes" />
+      <.input
+        field={@guest[:notes]}
+        type="textarea"
+        label="Notes"
+        placeholder="Notes about guests...what he/she prefers, likes"
+      />
       <:actions>
         <.button class="w-1/2">Submit</.button>
         <.link
-          href={~p"/admin/guests"}
+          patch={~p"/admin/guests"}
           class="text-white bg-red-500 hover:bg-red-400 w-1/2 text-center rounded-lg py-2 px-3 font-semibold"
         >
           Cancel

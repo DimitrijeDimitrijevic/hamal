@@ -50,7 +50,7 @@ defmodule HamalWeb.CoreComponents do
 
   def h2(assigns) do
     ~H"""
-    <h2 class="text-xl font-bold">
+    <h2 class="text-xl font-bold mt-4">
       <%= render_slot(@inner_block) %>
     </h2>
     """
@@ -68,6 +68,24 @@ defmodule HamalWeb.CoreComponents do
       href={@navigate}
       class="text-white bg-red-500 hover:bg-red-400 w-1/2 text-center rounded-lg py-2 px-3 font-semibold"
     >
+      <%= render_slot(@inner_block) %>
+    </.link>
+    """
+  end
+
+  @doc """
+   Renders old style phoenix navigation link back
+  """
+  attr :navigate, :any, required: true
+  slot :inner_block, required: true
+
+  def live_back_link(assigns) do
+    ~H"""
+    <.link
+      patch={@navigate}
+      class="mb-10 text-black text-center rounded-lg border-2 border-slate-500 hover:border-slate-300 py-2 px-3 font-semibold"
+    >
+      <.icon name="hero-arrow-left"></.icon>
       <%= render_slot(@inner_block) %>
     </.link>
     """

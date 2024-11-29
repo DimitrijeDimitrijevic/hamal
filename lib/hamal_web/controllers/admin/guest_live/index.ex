@@ -44,18 +44,32 @@ defmodule HamalWeb.Admin.GuestLive.Index do
 
     case Clients.update_guest(guest, guest_params) do
       {:ok, guest} ->
-        IO.inspect(guest)
+        socket =
+          socket
+          |> put_flash(:info, "#{guest.name} #{guest.surname} updated successfully")
+          |> push_patch(to: ~p"/admin/guests")
+
         {:noreply, socket}
 
       {:error, changeset} ->
-        IO.inspect(changeset)
+        socket =
+          socket
+          |> assign(guest: to_form(changeset, action: :validate))
+          |> put_flash(:error, "Please correct errors in inputs to continue!")
+
         {:noreply, socket}
     end
   end
 
   @impl true
-  def handle_event("validate", unsigned_params, socket) do
-    IO.inspect(unsigned_params)
+  def handle_event("validate", %{"guest" => guest_params, "action" => action} = params, socket) do
+    guest = socket.assigns.guest_object
+    guest_form = guest |> Guest.changeset(guest_params) |> to_form(action: :validate)
+
+    socket =
+      socket
+      |> assign(guest: guest_form)
+
     {:noreply, socket}
   end
 
@@ -90,7 +104,7 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     socket
     |> assign(doc_types: doc_types)
     |> assign(countries: countries)
-    |> assign(title: "Edit Guest")
+    |> assign(title: "Guest data")
     |> assign(action: :edit)
     |> assign(guest_object: guest)
     |> assign(guest: form)
