@@ -3,8 +3,8 @@ defmodule Hamal.Repo.Migrations.AddCompanyIdToReservation do
 
   def change do
     alter table("reservations") do
-      add :company_id, references("companies", on_delete: :nothing)
-      add :guest_id, references("guests", on_delete: :nothing)
+      add :company_id, references("companies", on_delete: :nilify_all)
+      add :guest_id, references("guests", on_delete: :nilify_all)
     end
   end
 end

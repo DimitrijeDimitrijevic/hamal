@@ -22,7 +22,7 @@ defmodule HamalWeb.Admin.GuestLive.Index do
   # Handle events from the client
   @impl true
   def handle_event("save", %{"action" => "new", "guest" => guest_params}, socket) do
-    case Guests.create_guest(guest_params) do
+    case Clients.create_guest(guest_params, :guest) do
       {:ok, _guest} ->
         socket =
           socket
@@ -32,8 +32,11 @@ defmodule HamalWeb.Admin.GuestLive.Index do
         {:noreply, socket}
 
       {:error, changeset} ->
-        socket = put_flash(socket, :error, "Please correct errors in inputs to continue!")
-        socket = assign(socket, guest: to_form(changeset))
+        socket =
+          socket
+          |> put_flash(:error, "Please correct errors in inputs to continue!")
+          |> assign(guest: to_form(changeset))
+
         {:noreply, socket}
     end
   end
@@ -62,13 +65,46 @@ defmodule HamalWeb.Admin.GuestLive.Index do
   end
 
   @impl true
-  def handle_event("validate", %{"guest" => guest_params, "action" => action} = params, socket) do
+  def handle_event("validate", %{"guest" => guest_params, "action" => "edit"} = params, socket) do
     guest = socket.assigns.guest_object
     guest_form = guest |> Guest.changeset(guest_params) |> to_form(action: :validate)
 
     socket =
       socket
       |> assign(guest: guest_form)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("validate", %{"guest" => guest_params, "action" => "new"} = params, socket) do
+    guest_form = %Guest{} |> Guest.changeset(guest_params) |> to_form(action: :validate)
+
+    {:noreply, assign(socket, guest: guest_form)}
+  end
+
+  @impl true
+  def handle_event("search", %{"query" => ""}, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("search", %{"query" => query}, socket) do
+    query = query |> String.trim() |> String.downcase()
+
+    all_guests = socket.assigns.streams.all_guests
+
+    guests =
+      Stream.filter(all_guests, fn g ->
+        guest_fullname = "#{g.name} #{g.surname}" |> String.downcase()
+        String.contains?(guest_fullname, query)
+      end)
+
+    IO.inspect(guests: guests)
+
+    socket =
+      socket
+      |> assign(guests: Enum.to_list(guests))
+      |> assign(all_guests: all_guests)
 
     {:noreply, socket}
   end

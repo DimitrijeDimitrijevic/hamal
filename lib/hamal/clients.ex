@@ -14,19 +14,27 @@ defmodule Hamal.Clients do
     |> Repo.insert()
   end
 
+  def create_guest(params, :guest) do
+    %Guest{}
+    |> Guest.changeset(params)
+    |> Repo.insert()
+  end
+
   def update_guest(guest, params) do
     guest
     |> Guest.changeset(params)
     |> Repo.update()
   end
 
-  def get_all_guests() do
-    Repo.all(Guest)
+  def get_all_guests(limit_per_page, page) do
+    from(g in Guest,
+      order_by: [desc: g.inserted_at],
+      limit: ^limit_per_page,
+      offset: (^page - 1) * ^limit_per_page,
+      select: g
+    )
+    |> Repo.all()
   end
-
-  # ToDo - Implement
-  # def create_guest(params, :guest) do
-  # end
 
   def get_guest(guest_id) do
     Repo.get_by(Guest, id: guest_id)
