@@ -1,8 +1,12 @@
 <%= if @action not in [:new, :edit] do %>
   <.add_button link={~p"/admin/guests/new"} action="Add new guest" />
-  <.form :let={field} for={%{}} phx-change="search" phx-submit="search_guests">
-    <.input field={field[:query]} type="text" />
-  </.form>
+  <div class="flex flex-row">
+    <.form :let={field} for={%{}} phx-change="search" class="flex flex-row gap-2">
+      <.input field={field[:name]} label="Name" type="text" />
+      <.input field={field[:surname]} label="Surname" type="text" />
+      <.input field={field[:document_number]} label="Document number" type="text" />
+    </.form>
+  </div>
   <.table
     id="guests"
     rows={@guests}
@@ -15,8 +19,21 @@
     <:col :let={guest} label="Notes"><%= guest.notes %></:col>
     <:col :let={guest} label="Doc type"><%= guest.document_type %></:col>
     <:col :let={guest} label="Doc number"><%= guest.document_number %></:col>
-    <:action></:action>
   </.table>
+  <%= case @current_page do %>
+    <% 0 -> %>
+      <.button_next_page />
+      <button phx-click="last-page">Last</button>
+    <% cur_page -> %>
+      <!-- Reached the end of pages -->
+      <%= if cur_page == @no_of_pages do %>
+        <.button_prev_page />
+      <% else %>
+        <button phx-click="first-page">First</button>
+        <.button_prev_page />
+        <.button_next_page />
+      <% end %>
+  <% end %>
 <% else %>
   <.live_back_link navigate={~p"/admin/guests"}>Back</.live_back_link>
   <.h2><%= @title %></.h2>

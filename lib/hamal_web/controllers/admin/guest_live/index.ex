@@ -3,6 +3,9 @@ defmodule HamalWeb.Admin.GuestLive.Index do
   alias Hamal.Clients.Guest
   alias Hamal.Clients
   alias Hamal.Helpers.Constants
+  alias Hamal.Paginator
+
+  @first_page 0
 
   @impl true
   def mount(_params, _session, socket) do
@@ -76,7 +79,7 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     {:noreply, socket}
   end
 
-  def handle_event("validate", %{"guest" => guest_params, "action" => "new"} = params, socket) do
+  def handle_event("validate", %{"guest" => guest_params, "action" => "new"} = _params, socket) do
     guest_form = %Guest{} |> Guest.changeset(guest_params) |> to_form(action: :validate)
 
     {:noreply, assign(socket, guest: guest_form)}
@@ -87,31 +90,94 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     {:noreply, socket}
   end
 
+  # @impl true
+  # def handle_event(
+  #       "search",
+  #       %{"name" => name, "surname" => surname, "document_number" => doc_number},
+  #       socket
+  #     ) do
+  #   guests = Clients.search_guests("Dimitrije", surname, doc_number)
+
+  #   all_guests = socket.assigns.guests
+  #   socket =
+  #     socket
+  #     |> assign(guests: guests)
+
+  #   {:noreply, socket}
+  # end
+
+  #### Simple pagination events #####
   @impl true
-  def handle_event("search", %{"query" => query}, socket) do
-    query = query |> String.trim() |> String.downcase()
-
-    all_guests = socket.assigns.streams.all_guests
-
-    guests =
-      Stream.filter(all_guests, fn g ->
-        guest_fullname = "#{g.name} #{g.surname}" |> String.downcase()
-        String.contains?(guest_fullname, query)
-      end)
-
-    IO.inspect(guests: guests)
+  def handle_event("next-page", _unsigned_params, socket) do
+    current_page = socket.assigns.current_page
+    next_page = current_page + 1
+    guests = Clients.get_guests(next_page)
 
     socket =
       socket
-      |> assign(guests: Enum.to_list(guests))
-      |> assign(all_guests: all_guests)
+      |> assign(guests: guests)
+      |> assign(current_page: next_page)
 
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("prev-page", _unsigned_params, socket) do
+    current_page = socket.assigns.current_page
+    prev_page = current_page - 1
+    guests = Clients.get_guests(prev_page)
+
+    socket =
+      socket
+      |> assign(guests: guests)
+      |> assign(current_page: prev_page)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("first-page", _unsigned_params, socket) do
+    guests = Clients.get_guests(@first_page)
+
+    socket =
+      socket
+      |> assign(guests: guests)
+      |> assign(current_page: @first_page)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("last-page", _unsigned_params, socket) do
+    last_page = socket.assigns.no_of_pages - 1
+
+    guests = Clients.get_guests(last_page)
+
+    socket =
+      socket
+      |> assign(guests: guests)
+      |> assign(current_page: last_page)
+
+    {:noreply, socket}
+  end
+
+  ####################
+
   # Helper functions
 
   # applying live action from router with fields
+
+  defp apply_live_action(_params, :index, socket) do
+    guests = Clients.get_guests(@first_page)
+    no_of_pages = Paginator.number_of_pages(Guest)
+
+    socket
+    |> assign(action: :index)
+    |> assign(guests: guests)
+    |> assign(no_of_pages: no_of_pages)
+    |> assign(current_page: @first_page)
+  end
+
   defp apply_live_action(_params, :new = action, socket) do
     doc_types = Constants.doc_types()
     countries = Constants.all_countries()
@@ -122,14 +188,6 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     |> assign(doc_types: doc_types)
     |> assign(countries: countries)
     |> assign(guest: guest_data(action))
-  end
-
-  defp apply_live_action(_params, :index, socket) do
-    guests = Clients.get_all_guests()
-
-    socket
-    |> assign(action: :index)
-    |> assign(guests: guests)
   end
 
   defp apply_live_action(%{"id" => id}, :edit, socket) do

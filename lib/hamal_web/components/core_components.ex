@@ -56,6 +56,28 @@ defmodule HamalWeb.CoreComponents do
     """
   end
 
+  def button_next_page(assigns) do
+    ~H"""
+    <button
+      class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-500 hover:border-slate-300"
+      phx-click="next-page"
+    >
+      <.icon name="hero-forward" />
+    </button>
+    """
+  end
+
+  def button_prev_page(assigns) do
+    ~H"""
+    <button
+      class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-500 hover:border-slate-300"
+      phx-click="prev-page"
+    >
+      <.icon name="hero-backward" />
+    </button>
+    """
+  end
+
   @doc """
    Renders old style phoenix navigation link back
   """

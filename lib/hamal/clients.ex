@@ -1,6 +1,7 @@
 defmodule Hamal.Clients do
   alias Hamal.Clients.{Guest, Company}
   alias Hamal.Repo
+  alias Hamal.Paginator
   import Ecto.Query
 
   def new_guest() do
@@ -26,13 +27,35 @@ defmodule Hamal.Clients do
     |> Repo.update()
   end
 
-  def get_all_guests(limit_per_page, page) do
+  def get_guests() do
+    all_guests_query()
+    |> Repo.all()
+  end
+
+  def get_guests(page) do
+    Paginator.paginate(Guest, page)
+    |> Repo.all()
+  end
+
+  defp all_guests_query() do
     from(g in Guest,
-      order_by: [desc: g.inserted_at],
-      limit: ^limit_per_page,
-      offset: (^page - 1) * ^limit_per_page,
+      order_by: [desc: :inserted_at],
       select: g
     )
+  end
+
+  defp search_guests_query(name, surname, document_number) do
+    name = "%#{name}%"
+
+    from(guest in Guest,
+      where: ilike(fragment("lower(?)", guest.name), ^name),
+      order_by: [desc: guest.inserted_at],
+      select: guest
+    )
+  end
+
+  def search_guests(name, surname, document_number) do
+    search_guests_query(name, surname, document_number)
     |> Repo.all()
   end
 
