@@ -44,18 +44,11 @@ defmodule Hamal.Clients do
     )
   end
 
-  defp search_guests_query(name, surname, document_number) do
-    name = "%#{name}%"
-
-    from(guest in Guest,
-      where: ilike(fragment("lower(?)", guest.name), ^name),
-      order_by: [desc: guest.inserted_at],
-      select: guest
-    )
+  defp search_guests_by_document_number_query(document_number) do
   end
 
-  def search_guests(name, surname, document_number) do
-    search_guests_query(name, surname, document_number)
+  def search_guests_by_document_number(document_number) when is_binary(document_number) do
+    search_guests_by_document_number_query(document_number)
     |> Repo.all()
   end
 

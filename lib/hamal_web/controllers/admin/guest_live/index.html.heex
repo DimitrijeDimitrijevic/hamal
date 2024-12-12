@@ -1,10 +1,14 @@
 <%= if @action not in [:new, :edit] do %>
   <.add_button link={~p"/admin/guests/new"} action="Add new guest" />
   <div class="flex flex-row">
-    <.form :let={field} for={%{}} phx-change="search" class="flex flex-row gap-2">
-      <.input field={field[:name]} label="Name" type="text" />
-      <.input field={field[:surname]} label="Surname" type="text" />
-      <.input field={field[:document_number]} label="Document number" type="text" />
+    <.form :let={f} for={%{}} phx-change="search" class="border-2 border-slate-400 p-4 rounded">
+      <label>
+        <input type="radio" name="type" value="doc_number" checked /> Document number
+      </label>
+      <label>
+        <input type="radio" name="type" value="name_surname" /> Name & Surname
+      </label>
+      <.input field={f[:query]} type="text" />
     </.form>
   </div>
   <.table

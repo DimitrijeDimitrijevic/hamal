@@ -9,6 +9,8 @@ defmodule HamalWeb.Admin.GuestLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    search_form = %{"query" => nil, "type" => nil} |> to_form(as: :search)
+    socket = assign(socket, search_form: search_form)
     {:ok, socket}
   end
 
@@ -90,21 +92,20 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     {:noreply, socket}
   end
 
-  # @impl true
-  # def handle_event(
-  #       "search",
-  #       %{"name" => name, "surname" => surname, "document_number" => doc_number},
-  #       socket
-  #     ) do
-  #   guests = Clients.search_guests("Dimitrije", surname, doc_number)
+  # Search by Document number
+  @impl true
+  def handle_event(
+        "search",
+        %{"query" => query, "type" => "doc_number"},
+        socket
+      ) do
+    query = String.trim(query)
 
-  #   all_guests = socket.assigns.guests
-  #   socket =
-  #     socket
-  #     |> assign(guests: guests)
-
-  #   {:noreply, socket}
-  # end
+    if String.length(query) < 3 do
+      {:noreply, socket}
+    else
+    end
+  end
 
   #### Simple pagination events #####
   @impl true
