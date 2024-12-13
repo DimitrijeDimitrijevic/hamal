@@ -14,7 +14,7 @@
   <.table
     id="guests"
     rows={@guests}
-    row_click={fn guest -> JS.navigate(~p"/admin/guests/#{guest}") end}
+    row_click={fn guest -> JS.patch(~p"/admin/guests/#{guest}") end}
   >
     <:col :let={guest} label="Name"><%= guest.name %></:col>
     <:col :let={guest} label="Surname"><%= guest.surname %></:col>
