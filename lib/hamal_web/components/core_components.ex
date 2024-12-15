@@ -107,7 +107,7 @@ defmodule HamalWeb.CoreComponents do
       patch={@navigate}
       class="mb-10 text-black text-center rounded-lg border-2 border-slate-500 hover:border-slate-300 py-2 px-3 font-semibold"
     >
-      <.icon name="hero-arrow-left"></.icon>
+      <.icon name="hero-arrow-left" />
       <%= render_slot(@inner_block) %>
     </.link>
     """

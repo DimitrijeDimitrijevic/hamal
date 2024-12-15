@@ -45,11 +45,21 @@ defmodule Hamal.Clients do
   end
 
   defp search_guests_by_document_number_query(document_number) do
+    from g in Guest,
+      where: ilike(fragment("lower(?)", g.document_number), ^document_number),
+      select: g
   end
 
   def search_guests_by_document_number(document_number) when is_binary(document_number) do
+    document_number = String.trim(document_number) |> String.downcase()
+    document_number = "%#{document_number}%"
+
     search_guests_by_document_number_query(document_number)
     |> Repo.all()
+  end
+
+  def search_guests_by_name_surname(query_string) do
+    query = query_string |> String.trim() |> String.downcase()
   end
 
   def get_guest(guest_id) do

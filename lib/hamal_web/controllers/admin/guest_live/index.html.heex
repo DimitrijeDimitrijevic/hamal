@@ -8,7 +8,7 @@
       <label>
         <input type="radio" name="type" value="name_surname" /> Name & Surname
       </label>
-      <.input field={f[:query]} type="text" />
+      <.input field={f[:query]} type="text" placeholder="type at least 3 chars to start search" />
     </.form>
   </div>
   <.table
@@ -24,19 +24,21 @@
     <:col :let={guest} label="Doc type"><%= guest.document_type %></:col>
     <:col :let={guest} label="Doc number"><%= guest.document_number %></:col>
   </.table>
-  <%= case @current_page do %>
-    <% 0 -> %>
-      <.button_next_page />
-      <button phx-click="last-page">Last</button>
-    <% cur_page -> %>
-      <!-- Reached the end of pages -->
-      <%= if cur_page == @no_of_pages do %>
-        <.button_prev_page />
-      <% else %>
-        <button phx-click="first-page">First</button>
-        <.button_prev_page />
+  <%= if @pagination do %>
+    <%= case @current_page do %>
+      <% 0 -> %>
         <.button_next_page />
-      <% end %>
+        <button phx-click="last-page">Last</button>
+      <% cur_page -> %>
+        <!-- Reached the end of pages -->
+        <%= if cur_page == @no_of_pages do %>
+          <.button_prev_page />
+        <% else %>
+          <button phx-click="first-page">First</button>
+          <.button_prev_page />
+          <.button_next_page />
+        <% end %>
+    <% end %>
   <% end %>
 <% else %>
   <.live_back_link navigate={~p"/admin/guests"}>Back</.live_back_link>

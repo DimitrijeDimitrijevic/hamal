@@ -9,8 +9,11 @@ defmodule HamalWeb.Admin.GuestLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    search_form = %{"query" => nil, "type" => nil} |> to_form(as: :search)
-    socket = assign(socket, search_form: search_form)
+    socket =
+      socket
+      |> assign(current_page: @first_page)
+      |> assign(pagination: true)
+
     {:ok, socket}
   end
 
@@ -87,16 +90,40 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     {:noreply, assign(socket, guest: guest_form)}
   end
 
-  @impl true
-  def handle_event("search", %{"query" => ""}, socket) do
-    {:noreply, socket}
-  end
-
   # Search by Document number
   @impl true
   def handle_event(
         "search",
-        %{"query" => query, "type" => "doc_number"},
+        %{"query" => document_number, "type" => "doc_number"},
+        socket
+      ) do
+    document_number = String.trim(document_number)
+
+    if String.length(document_number) < 3 do
+      socket =
+        socket
+        |> assign(pagination: true)
+
+      socket = apply_live_action(nil, :index, socket)
+
+      {:noreply, socket}
+    else
+      guests = Clients.search_guests_by_document_number(document_number)
+
+      socket =
+        socket
+        |> assign(pagination: false)
+        |> assign(guests: guests)
+
+      {:noreply, socket}
+    end
+  end
+
+  # search by name & surname, actually we will search by name OR surname
+  @impl true
+  def handle_event(
+        "search",
+        %{"query" => query, "type" => "name_surname"},
         socket
       ) do
     query = String.trim(query)
@@ -169,14 +196,19 @@ defmodule HamalWeb.Admin.GuestLive.Index do
   # applying live action from router with fields
 
   defp apply_live_action(_params, :index, socket) do
-    guests = Clients.get_guests(@first_page)
+    page =
+      if socket.assigns.current_page > @first_page,
+        do: socket.assigns.current_page,
+        else: @first_page
+
+    guests = Clients.get_guests(page)
     no_of_pages = Paginator.number_of_pages(Guest)
 
     socket
     |> assign(action: :index)
     |> assign(guests: guests)
     |> assign(no_of_pages: no_of_pages)
-    |> assign(current_page: @first_page)
+    |> assign(current_page: page)
   end
 
   defp apply_live_action(_params, :new = action, socket) do
@@ -195,8 +227,10 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     {form, guest} = guest_form(:edit, id)
     doc_types = Constants.doc_types()
     countries = Constants.all_countries()
+    current_page = socket.assigns.current_page
 
     socket
+    |> assign(current_page: current_page)
     |> assign(doc_types: doc_types)
     |> assign(countries: countries)
     |> assign(title: "Guest data")
