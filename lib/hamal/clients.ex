@@ -60,6 +60,15 @@ defmodule Hamal.Clients do
 
   def search_guests_by_name_surname(query_string) do
     query = query_string |> String.trim() |> String.downcase()
+    query = "%#{query}%"
+
+    from(g in Guest,
+      where:
+        ilike(fragment("lower(?)", g.name), ^query) or
+          ilike(fragment("lower(?)", g.surname), ^query),
+      select: g
+    )
+    |> Repo.all()
   end
 
   def get_guest(guest_id) do

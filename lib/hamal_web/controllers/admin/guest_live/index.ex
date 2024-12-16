@@ -104,8 +104,6 @@ defmodule HamalWeb.Admin.GuestLive.Index do
         socket
         |> assign(pagination: true)
 
-      socket = apply_live_action(nil, :index, socket)
-
       {:noreply, socket}
     else
       guests = Clients.search_guests_by_document_number(document_number)
@@ -113,7 +111,7 @@ defmodule HamalWeb.Admin.GuestLive.Index do
       socket =
         socket
         |> assign(pagination: false)
-        |> assign(guests: guests)
+        |> assign(temporary_assigns: [guests: guests])
 
       {:noreply, socket}
     end
@@ -131,6 +129,15 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     if String.length(query) < 3 do
       {:noreply, socket}
     else
+      guests = Clients.search_guests_by_name_surname(query)
+      dbg(guests)
+
+      socket =
+        socket
+        |> assign(guests: guests)
+        |> assign(pagination: false)
+
+      {:noreply, socket}
     end
   end
 

@@ -16,13 +16,13 @@
     rows={@guests}
     row_click={fn guest -> JS.patch(~p"/admin/guests/#{guest}") end}
   >
-    <:col :let={guest} label="Name"><%= guest.name %></:col>
-    <:col :let={guest} label="Surname"><%= guest.surname %></:col>
-    <:col :let={guest} label="Email"><%= guest.email %></:col>
-    <:col :let={guest} label="Phone"><%= guest.phone %></:col>
-    <:col :let={guest} label="Notes"><%= guest.notes %></:col>
-    <:col :let={guest} label="Doc type"><%= guest.document_type %></:col>
-    <:col :let={guest} label="Doc number"><%= guest.document_number %></:col>
+    <:col :let={guest} label="Name">{guest.name}</:col>
+    <:col :let={guest} label="Surname">{guest.surname}</:col>
+    <:col :let={guest} label="Email">{guest.email}</:col>
+    <:col :let={guest} label="Phone">{guest.phone}</:col>
+    <:col :let={guest} label="Notes">{guest.notes}</:col>
+    <:col :let={guest} label="Doc type">{guest.document_type}</:col>
+    <:col :let={guest} label="Doc number">{guest.document_number}</:col>
   </.table>
   <%= if @pagination do %>
     <%= case @current_page do %>
@@ -42,7 +42,7 @@
   <% end %>
 <% else %>
   <.live_back_link navigate={~p"/admin/guests"}>Back</.live_back_link>
-  <.h2><%= @title %></.h2>
+  <.h2>{@title}</.h2>
   <p>Please make sure you always provide correct data.</p>
   <p>Fields labeled with red asterix are mandatory fields</p>
   <div class="mx-auto max-w-xl">
