@@ -5,6 +5,8 @@ defmodule HamalWeb.Admin.GuestLive.Index do
   alias Hamal.Helpers.Constants
   alias Hamal.Paginator
 
+  @document_number_search_starts 3
+  @name_search_starts 4
   @first_page 0
 
   @impl true
@@ -13,6 +15,7 @@ defmodule HamalWeb.Admin.GuestLive.Index do
       socket
       |> assign(current_page: @first_page)
       |> assign(pagination: true)
+      |> assign(search: false)
 
     {:ok, socket}
   end
@@ -73,7 +76,7 @@ defmodule HamalWeb.Admin.GuestLive.Index do
   end
 
   @impl true
-  def handle_event("validate", %{"guest" => guest_params, "action" => "edit"} = params, socket) do
+  def handle_event("validate", %{"guest" => guest_params, "action" => "edit"} = _params, socket) do
     guest = socket.assigns.guest_object
     guest_form = guest |> Guest.changeset(guest_params) |> to_form(action: :validate)
 
@@ -99,9 +102,10 @@ defmodule HamalWeb.Admin.GuestLive.Index do
       ) do
     document_number = String.trim(document_number)
     document_number_length = String.length(document_number)
+    is_search = socket.assigns.search
 
-    if document_number_length < 3 do
-      socket = if document_number_length < 2, do: apply_live_action(nil, :index, socket), else: socket |> assign(pagination: false)
+    if document_number_length < @document_number_search_starts do
+      socket = if is_search, do: apply_live_action(nil, :index, socket) |> assign(pagination: true) |> assign(search: false), else: socket
 
       {:noreply, socket}
     else
@@ -111,6 +115,7 @@ defmodule HamalWeb.Admin.GuestLive.Index do
         socket
         |> assign(pagination: false)
         |> assign(guests: guests)
+        |> assign(search: true)
 
       {:noreply, socket}
     end
@@ -125,9 +130,10 @@ defmodule HamalWeb.Admin.GuestLive.Index do
       ) do
     query = String.trim(query)
     query_length = String.length(query)
+    is_search = socket.assigns.search
 
-    if query_length < 3 do
-      socket = if query_length < 2, do: apply_live_action(nil, :index, socket), else: socket |> assign(pagination: false)
+    if query_length < @name_search_starts do
+      socket = if is_search, do: apply_live_action(nil, :index, socket) |> assign(pagination: true) |> assign(search: false), else: socket
 
       {:noreply, socket}
     else
@@ -137,6 +143,7 @@ defmodule HamalWeb.Admin.GuestLive.Index do
         socket
         |> assign(guests: guests)
         |> assign(pagination: false)
+        |> assign(search: true)
 
       {:noreply, socket}
     end

@@ -19,6 +19,36 @@ defmodule HamalWeb.CoreComponents do
   alias Phoenix.LiveView.JS
   import HamalWeb.Gettext
 
+  attr :pagination, :boolean, default: false
+  attr :current_page, :integer, default: 0
+  attr :no_of_pages, :integer, default: 0
+  def pagination(assigns) do
+    ~H"""
+    <%= if @pagination do %>
+      <%= case @current_page do %>
+        <% 0 -> %>
+          <button class="disabled: text-slate-300" phx-click="first-page" disabled>First</button>
+          <.button_prev_page disabled={true}/>
+          <.button_next_page />
+          <button phx-click="last-page">Last</button>
+        <% cur_page -> %>
+          <!-- Reached the end of pages -->
+          <%= if cur_page == @no_of_pages - 1 do %>
+            <button phx-click="first-page">First</button>
+            <.button_prev_page />
+            <.button_next_page disabled={true}/>
+            <button class="disabled: text-slate-300" phx-click="last-page" disabled>Last</button>
+          <% else %>
+          <button phx-click="first-page">First</button>
+          <.button_prev_page />
+          <.button_next_page />
+          <button phx-click="last-page">Last</button>
+          <% end %>
+      <% end %>
+    <% end %>
+    """
+  end
+
   ## My own components
   attr :link, :string, required: true
   attr :action, :string, required: true
