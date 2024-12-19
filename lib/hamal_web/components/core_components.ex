@@ -56,25 +56,45 @@ defmodule HamalWeb.CoreComponents do
     """
   end
 
+  attr :disabled, :boolean, default: false
   def button_next_page(assigns) do
     ~H"""
+    <%= if @disabled do %>
+    <button
+      class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-300 text-slate-300"
+      disabled
+    >
+      <.icon name="hero-forward" />
+    </button>
+    <% else %>
     <button
       class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-500 hover:border-slate-300"
       phx-click="next-page"
     >
       <.icon name="hero-forward" />
     </button>
+    <% end %>
     """
   end
 
+  attr :disabled, :boolean, default: false
   def button_prev_page(assigns) do
     ~H"""
+    <%= if @disabled do %>
+    <button
+      class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-300 text-slate-300"
+      disabled
+      >
+      <.icon name="hero-backward" />
+    </button>
+    <% else %>
     <button
       class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-500 hover:border-slate-300"
       phx-click="prev-page"
     >
       <.icon name="hero-backward" />
     </button>
+    <% end %>
     """
   end
 
