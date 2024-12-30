@@ -74,6 +74,8 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
             )
             |> push_patch(to: ~p"/admin/reservations")
 
+          {:noreply, socket}
+
         {:error, changeset} ->
           socket =
             socket
@@ -85,11 +87,29 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     end
   end
 
+  @impl true
+  def handle_event(
+        "filter-check-in-rooms",
+        %{"reservation" => %{"check_in" => check_in_date}},
+        socket
+      ) do
+    {:ok, check_in_date} = Date.from_iso8601(check_in_date)
+    dbg(check_in_date)
+
+    available_rooms = reservable_rooms(check_in_date)
+
+    socket =
+      socket
+      |> assign(rooms: available_rooms)
+
+    {:noreply, socket}
+  end
+
   #### NEW ACTION ####
   defp apply_live_action(_params, :new, socket) do
     reservation = Bookings.new_reservation() |> to_form()
 
-    rooms = rooms_list()
+    rooms = reservable_rooms()
     reservation_channels = Constants.reservation_channel_types()
 
     socket
@@ -105,10 +125,10 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
     socket
     |> assign(action: :index)
-    |> assign(reservations: reservations)
+    |> stream(:reservations, reservations)
   end
 
-  defp apply_live_action(params, action, socket) do
+  defp apply_live_action(_params, action, socket) do
     socket
     |> assign(action: action)
   end
@@ -160,8 +180,8 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     end)
   end
 
-  defp rooms_list() do
-    rooms = Bookings.get_reservable_rooms() |> Enum.map(&room_label/1)
+  defp rooms_list(rooms) do
+    rooms = Enum.map(rooms, fn room -> room_label(room) end)
     [{"Select room", nil} | rooms]
   end
 
@@ -177,6 +197,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
   defp handle_room_error({:ok, _}), do: {false, ""}
 
+  # View helper to list numbers for reserved rooms
   def reserved_rooms([room]), do: "#{room.number}"
 
   def reserved_rooms(rooms) do
@@ -184,4 +205,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
       acc <> "#{room.number} "
     end)
   end
+
+  defp reservable_rooms(date), do: Bookings.get_reservable_rooms(date) |> rooms_list()
+  defp reservable_rooms(), do: Bookings.get_reservable_rooms() |> rooms_list()
 end

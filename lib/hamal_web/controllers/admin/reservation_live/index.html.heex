@@ -3,18 +3,18 @@
   <.link patch={~p"/admin/reservations/?param=name"}>Sort by name</.link>
   <.table
     id="reservations"
-    rows={@reservations}
-    row_click={fn reservation -> JS.patch(~p"/admin/reservations/#{reservation}/edit") end}
+    rows={@streams.reservations}
+    row_click={fn {_id, reservation} -> JS.patch(~p"/admin/reservations/#{reservation}/edit") end}
   >
-    <:col :let={reservation} label="ID"><%= reservation.id %></:col>
-    <:col :let={reservation} label="Check In"><%= date(reservation.check_in) %></:col>
-    <:col :let={reservation} label="Check Out"><%= date(reservation.check_out) %></:col>
-    <:col :let={reservation} label="Name"><%= reservation.guest_name %></:col>
-    <:col :let={reservation} label="Surname"><%= reservation.guest_surname %></:col>
-    <:col :let={reservation} label="Nights"><%= reservation.no_of_nights %></:col>
-    <:col :let={reservation} label="Contact number"><%= reservation.contact_number %></:col>
-    <:col :let={reservation} label="Channel"><%= reservation.channel %></:col>
-    <:col :let={reservation} label="Rooms"><%= reserved_rooms(reservation.rooms) %></:col>
+    <:col :let={{_id, reservation}} label="ID">{reservation.id}</:col>
+    <:col :let={{_id, reservation}} label="Check In">{date(reservation.check_in)}</:col>
+    <:col :let={{_id, reservation}} label="Check Out">{date(reservation.check_out)}</:col>
+    <:col :let={{_id, reservation}} label="Name">{reservation.guest_name}</:col>
+    <:col :let={{_id, reservation}} label="Surname">{reservation.guest_surname}</:col>
+    <:col :let={{_id, reservation}} label="Nights">{reservation.no_of_nights}</:col>
+    <:col :let={{_id, reservation}} label="Contact number">{reservation.contact_number}</:col>
+    <:col :let={{_id, reservation}} label="Channel">{reservation.channel}</:col>
+    <:col :let={{_id, reservation}} label="Rooms">{reserved_rooms(reservation.rooms)}</:col>
   </.table>
 <% else %>
   <div class="mx-auto max-w-xl">
@@ -26,7 +26,14 @@
         label="Surname"
         field_required={true}
       />
-      <.input field={@reservation[:check_in]} type="date" label="Check in" field_required={true} />
+      <.input
+        field={@reservation[:check_in]}
+        type="date"
+        label="Check in"
+        field_required={true}
+        phx-change="filter-check-in-rooms"
+        value={Date.utc_today()}
+      />
       <.input
         field={@reservation[:no_of_nights]}
         type="number"
@@ -42,7 +49,7 @@
         field_required={true}
       />
       <%= if @room_error do %>
-        <.error><%= @room_error_message %></.error>
+        <.error>{@room_error_message}</.error>
       <% end %>
       <!-- Begin Add Button -->
       <div class="grid">

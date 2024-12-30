@@ -1,4 +1,8 @@
 defmodule HamalWeb.AdminAuth do
+  @moduledoc """
+  Regular plug for basic auth.
+  Username and password comes from ENV on server!
+  """
   def init(opts) do
     opts
   end

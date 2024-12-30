@@ -29,9 +29,43 @@ defmodule Hamal.Bookings do
   @doc """
   All rooms which are not under maintenance or out of order
   """
-  def get_reservable_rooms do
-    from(r in Room, where: r.status == 0, select: r)
+  def get_reservable_rooms(today \\ Date.utc_today()) do
+    booked_rooms_ids = get_booked_rooms_for_period(today)
+    availabe_rooms = available_rooms_query() |> Repo.all()
+
+    Enum.filter(availabe_rooms, fn room ->
+      room.id not in booked_rooms_ids
+    end)
+  end
+
+  defp available_rooms_query() do
+    from(room in Room,
+      where: room.status == 0,
+      select: %{id: room.id, number: room.number, no_of_beds: room.no_of_beds}
+    )
+  end
+
+  def get_booked_rooms_for_period(check_in) do
+    get_booked_rooms_for_check_in_query(check_in)
     |> Repo.all()
+    |> Stream.flat_map(fn reservation ->
+      reservation.rooms
+    end)
+    |> Stream.map(fn room ->
+      room.id
+    end)
+    |> Enum.uniq()
+  end
+
+  # TODO - Implement when check-in is over
+  # def get_current_occupied_rooms(today \\ Date.utc_today())
+
+  defp get_booked_rooms_for_check_in_query(check_in) do
+    from(reservation in Hamal.Bookings.Reservation,
+      where: reservation.check_in == ^check_in,
+      select: reservation,
+      preload: [:rooms]
+    )
   end
 
   def new_reservation() do
@@ -55,7 +89,7 @@ defmodule Hamal.Bookings do
       {:ok, %{reservation: reservation}} ->
         {:ok, reservation}
 
-      {:error, operation, changeset, changes} ->
+      {:error, operation, changeset, _changes} ->
         case operation do
           :reservation -> {:error, changeset}
           _ -> {:error, :other_failure}
