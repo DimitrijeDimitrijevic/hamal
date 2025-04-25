@@ -1,6 +1,7 @@
 <h2>Edit User</h2>
-<p>Edit user details</p>
-<div class="mx-auto max-w-xl">
+<p> {@user.username} </p>
+<div class="flex flex-row gap-4">
+<div class="w-1/2">
   <.simple_form :let={u} for={@user_changeset} action={~p"/admin/users/#{@user}"}>
     <.input field={u[:name]} label="Name" field_required={true} />
     <.input field={u[:surname]} label="Surname" field_required={true} />
@@ -15,8 +16,12 @@
     />
     <.input field={u[:password]} label="Password" type="password" />
     <:actions>
-      <.button class="w-1/2">Update</.button>
-      <.back_link navigate={~p"/admin/users"}>Cancel</.back_link>
+      <.button>Save</.button>
+      <.link href={~p"/admin/users"}> Cancel </.link>
     </:actions>
   </.simple_form>
+</div>
+<div>
+Documentation place or new menu items
+</div>
 </div>
