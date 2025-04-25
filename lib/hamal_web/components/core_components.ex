@@ -76,15 +76,15 @@ defmodule HamalWeb.CoreComponents do
     """
   end
 
-  slot :inner_block, required: true
+  # slot :inner_block, required: true
 
-  def h2(assigns) do
-    ~H"""
-    <h2 class="text-xl font-bold mt-4">
-      <%= render_slot(@inner_block) %>
-    </h2>
-    """
-  end
+  # def h2(assigns) do
+  #   ~H"""
+  #   <h2 class="text-xl font-bold mt-4">
+  #     <%= render_slot(@inner_block) %>
+  #   </h2>
+  #   """
+  # end
 
   attr :disabled, :boolean, default: false
   def button_next_page(assigns) do
@@ -352,9 +352,9 @@ defmodule HamalWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-6 space-y-4 bg-white">
+      <div class="mt-4 space-y-3 bg-white">
         <%= render_slot(@inner_block, f) %>
-        <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-4">
+        <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-3">
           <%= render_slot(action, f) %>
         </div>
       </div>

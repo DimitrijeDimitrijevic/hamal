@@ -1,4 +1,4 @@
-<.h2>Edit User <%= @user.username %></.h2>
+<h2>Edit User</h2>
 <p>Edit user details</p>
 <div class="mx-auto max-w-xl">
   <.simple_form :let={u} for={@user_changeset} action={~p"/admin/users/#{@user}"}>
@@ -15,7 +15,7 @@
     />
     <.input field={u[:password]} label="Password" type="password" />
     <:actions>
-      <.button class="w-1/2">Submit</.button>
+      <.button class="w-1/2">Update</.button>
       <.back_link navigate={~p"/admin/users"}>Cancel</.back_link>
     </:actions>
   </.simple_form>

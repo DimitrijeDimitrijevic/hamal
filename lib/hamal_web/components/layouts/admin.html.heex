@@ -1,29 +1,32 @@
-<div class="grid p-4 bg-white place-content-center border-b-2 text-xl sticky top-0 z-40">
-  <ul class="flex">
-    <li class="mr-6 border-x-2">
-      <a class="p-2 text-blue-500 hover:text-blue-800" href={~p"/admin/users"}>Users</a>
+<div class="flex flex-row h-full mt-1">
+<div class="flex-col border-r-2 min-h-screen">
+<p class="p-2"> Main menu </p>
+<hr>
+  <ul class="m-2">
+    <li class="mb-2 mt-2">
+      <a href={~p"/admin/users"}>Users</a>
     </li>
-    <li class="mr-6 border-x-2">
-      <a class="p-2 text-blue-500 hover:text-blue-800" href={~p"/admin/rooms"}>Rooms</a>
+    <li class="mb-2 mt-2">
+      <a href={~p"/admin/rooms"}>Rooms</a>
     </li>
-    <li class="mr-6 border-x-2">
-      <a class="p-2 text-blue-500 hover:text-blue-800" href={~p"/admin/reservations"}>
+    <li class="mb-2 mt-2">
+      <a href={~p"/admin/reservations"}>
         Reservations
       </a>
     </li>
-    <li class="mr-6 border-x-2">
-      <a class="p-2 text-blue-500 hover:text-blue-800" href={~p"/admin/guests"}>Guest book</a>
+    <li class="mb-2 mt-2">
+      <a href={~p"/admin/guests"}>Guest book</a>
     </li>
-    <li class="mr-6 border-x-2">
-      <.link class="p-2 text-blue-500 hover:text-blue-800" href="#">Receipts</.link>
+    <li class="mb-2 mt-2">
+    <a href={~p"/admin/receipts"}>Reciepts</a>
     </li>
   </ul>
 </div>
-<main class="p-4 sm:px-6 lg:px-8 overflow-hidden">
-  <div class="container">
+  <div>
     <.flash_group flash={@flash} />
   </div>
-  <div class="mx-auto">
+  <main class="w-full px-4 pr-4">
+  <!--- Main Content of the page from other templates --->
     <%= @inner_content %>
-  </div>
 </main>
+</div>

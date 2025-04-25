@@ -28,7 +28,7 @@
 
 <% else %>
   <.live_back_link navigate={~p"/admin/guests"}>Back</.live_back_link>
-  <.h2>{@title}</.h2>
+  <h2>{@title}</h2>
   <p>Please make sure you always provide correct data.</p>
   <p>Fields labeled with red asterix are mandatory fields</p>
   <div class="mx-auto max-w-xl">
@@ -51,7 +51,7 @@
           <%= country %>
         </option>
       </datalist>
-      <.input field={@guest[:city]} label="City" field_required={true} placeholder="Leskovac" />
+      <.input field={@guest[:city]} label="City" field_required={true} placeholder="Istanbul" />
       <.input
         field={@guest[:address]}
         label="Address"
@@ -76,7 +76,7 @@
         field={@guest[:notes]}
         type="textarea"
         label="Notes"
-        placeholder="Notes about guests...what he/she prefers, likes"
+        placeholder="Notes about guests...what are preferences, likes, important information to know!"
       />
       <:actions>
         <.button class="w-1/2">Submit</.button>

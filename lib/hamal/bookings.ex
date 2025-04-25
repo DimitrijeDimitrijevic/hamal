@@ -80,6 +80,13 @@ defmodule Hamal.Bookings do
     |> Repo.preload(:rooms)
   end
 
+
+  def get_reservation(reservation_id) do
+    Reservation
+    |> Repo.get(reservation_id)
+    |> Repo.preload(:rooms)
+  end
+
   def create_reservation(params, room_ids) do
     result =
       reservation_multi(params, room_ids)
@@ -140,7 +147,7 @@ defmodule Hamal.Bookings do
         :guest_id
       ])
     end)
-    |> Ecto.Multi.inspect()
+    |> dbg()
   end
 
   def get_rooms_by_ids(room_ids) do
