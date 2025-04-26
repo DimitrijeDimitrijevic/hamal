@@ -1,6 +1,6 @@
 <h2>Add New Room</h2>
-<p>Form for adding new rooms</p>
-<div class="mx-auto max-w-xl">
+<div class="flex flex-row gap-4">
+<div class="w-1/2">
   <.simple_form :let={room} for={@room_changeset} action={~p"/admin/rooms"}>
     <.input field={room[:number]} label="Room number" field_required={true} placeholder="201" />
     <.input
@@ -25,13 +25,16 @@
     />
     <.input type="textarea" field={room[:notes]} label="Notes" placeholder="Room notes" />
     <:actions>
-      <.button class="w-1/2">Submit</.button>
+      <.button>Submit</.button>
       <.link
         href={~p"/admin/rooms"}
-        class="text-white bg-red-500 hover:bg-red-400 w-1/2 text-center rounded-lg py-2 px-3 font-semibold"
       >
         Cancel
       </.link>
     </:actions>
   </.simple_form>
-</div>
+  </div>
+  <div>
+  Context helpers
+  </div>
+  </div>

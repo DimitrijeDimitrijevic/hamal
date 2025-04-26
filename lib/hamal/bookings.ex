@@ -26,6 +26,9 @@ defmodule Hamal.Bookings do
     Repo.all(Room)
   end
 
+  def get_room(room_id) do
+    Repo.get_by(Room, id: room_id)
+  end
   @doc """
   All rooms which are not under maintenance or out of order
   """
@@ -57,8 +60,6 @@ defmodule Hamal.Bookings do
     |> Enum.uniq()
   end
 
-  # TODO - Implement when check-in is over
-  # def get_current_occupied_rooms(today \\ Date.utc_today())
 
   defp get_booked_rooms_for_check_in_query(check_in) do
     from(reservation in Hamal.Bookings.Reservation,

@@ -2,6 +2,8 @@ defmodule Hamal.Bookings.Room do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @min_room_price 1000
+
   @permitted [:number, :no_of_beds, :price, :notes]
   @required [:number, :no_of_beds, :price]
 
@@ -10,8 +12,6 @@ defmodule Hamal.Bookings.Room do
     field :no_of_beds, :integer
     field :price, :integer
     field :notes, :string
-    # Statuses: available, booked, occupied, under_maintenance, out_of_order
-    # Statuses are set and updated by the hotel staff and in CSV form
     field :status, :integer, default: 0
     many_to_many :reservations, Hamal.Bookings.Reservation, join_through: "reservations_rooms"
 
@@ -21,6 +21,9 @@ defmodule Hamal.Bookings.Room do
   def changeset(room, params \\ %{}) do
     room
     |> cast(params, @permitted)
+    |> validate_required(@required)
+    |> validate_number(:price, greater_than_or_equal_to: @min_room_price)
+    |> unique_constraint([:number])
   end
 
   def map_statuses(status) do

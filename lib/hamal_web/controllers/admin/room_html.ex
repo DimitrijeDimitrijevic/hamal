@@ -5,11 +5,9 @@ defmodule HamalWeb.Admin.RoomHTML do
 
   def room_statuses() do
     [
-      {"available", 0},
-      {"booked", 1},
-      {"occupied", 2},
-      {"under maintanance", 3},
-      {"out of order", 4}
+      {"Available", 0},
+      {"Under maintanance", 1},
+      {"Out of order", 2}
     ]
   end
 

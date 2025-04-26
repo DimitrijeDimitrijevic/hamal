@@ -20,11 +20,16 @@ defmodule HamalWeb.Admin.RoomController do
         |> redirect(to: ~p"/admin/rooms")
 
       {:error, room_changeset} ->
-        IO.inspect(room_changeset)
 
         conn
         |> put_flash(:error, "Please correct errors in inputs to continue!")
         |> render(:new, room_changeset: room_changeset)
     end
+  end
+
+  def show(conn, %{"id" => room_id}) do
+    room = Bookings.get_room(room_id)
+    render(conn, "show.html", room: room)
+
   end
 end
