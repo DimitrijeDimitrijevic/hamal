@@ -36,6 +36,22 @@ defmodule Hamal.Accounts do
     |> Repo.update()
   end
 
+  def search_users(query, type) do
+    search_users_query(query, type)
+    |> Repo.all()
+  end
+
+  defp search_users_query(query, :name) do
+    (from user in User, where: ilike(user.name, ^"%#{query}%"), select: user)
+  end
+  defp search_users_query(query, :username) do
+    (from user in User, where: ilike(user.username, ^"%#{query}%"), select: user)
+  end
+  defp search_users_query(query, :email) do
+    (from user in User, where: ilike(user.email, ^"%#{query}%"), select: user)
+  end
+
+
   ## Database getters
 
   @doc """

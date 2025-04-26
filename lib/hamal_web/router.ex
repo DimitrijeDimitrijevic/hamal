@@ -57,7 +57,6 @@ defmodule HamalWeb.Router do
 
     get "/", HomeController, :index
     resources "/users", UserController
-
     resources "/rooms", RoomController
 
     live_session :admin, layout: {HamalWeb.Layouts, :admin} do

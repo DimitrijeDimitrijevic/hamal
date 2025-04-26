@@ -1,16 +1,10 @@
-<h2>Users in app.</h2>
-<p>
-  All users in app.
-</p>
+<h2>Users</h2>
+
 <div class="mt-4 flex flex-row gap-4 border-t">
-<.link
-  href={~p"/admin/users/new"}
-  class="inline-flex items-center"
->
-  <.icon name="hero-plus-circle" /> Add User
-</.link>
+<.add_button route={~p"/admin/users/new"}> Add User </.add_button>
+<div class="ml-8">
   <.form :let={f} for={%{}} action={~p"/admin/users"} method="get" class="flex flex-row gap-4">
-    <.input field={f[:q]} type="text" placeholder="username@hotelaloha" />
+    <.input field={f[:query]} type="text" placeholder="username@hotelaloha" />
     <.input
       field={f[:type]}
       type="select"
@@ -20,7 +14,9 @@
     <button>
       <.icon name="hero-magnifying-glass" /> Search
     </button>
+     <.link :if={@search} href={~p"/admin/users"} class="inline-flex items-center underline"> Reset search </.link>
   </.form>
+  </div>
 </div>
 
 

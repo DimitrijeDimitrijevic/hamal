@@ -107,10 +107,13 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
   #### NEW ACTION ####
   defp apply_live_action(_params, :new, socket) do
-    reservation = Bookings.new_reservation() |> to_form()
+    today = Date.utc_today()
+    reservation = Bookings.new_reservation(%{check_in: today}) |> to_form()
 
     rooms = reservable_rooms()
     reservation_channels = Constants.reservation_channel_types()
+
+    dbg(reservation)
 
     socket
     |> assign(room_error: false)
@@ -267,16 +270,15 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
           label="Check in"
           field_required={true}
           phx-change="filter-check-in-rooms"
-          value={Date.utc_today()}
         />
-        <%!-- <.input
+        <.input
           field={@reservation[:no_of_nights]}
           type="number"
           label="Number of nights"
           field_required={true}
           min="1"
           max="30"
-        /> --%>
+        />
         <.input field={@reservation[:check_out]} type="date" label="Check out" field_required={true} />
         <%= if @room_error do %>
           <.error>{@room_error_message}</.error>

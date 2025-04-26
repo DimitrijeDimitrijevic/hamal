@@ -68,9 +68,9 @@ defmodule Hamal.Bookings do
     )
   end
 
-  def new_reservation() do
+  def new_reservation(params \\ %{}) do
     %Reservation{}
-    |> Reservation.new_changeset()
+    |> Reservation.new_changeset(params)
   end
 
   def get_all_reservations() do

@@ -49,42 +49,30 @@ defmodule HamalWeb.CoreComponents do
     """
   end
 
-  ## My own components
-  attr :link, :string, required: true
-  attr :action, :string, required: true
+  slot :inner_block, required: true, doc: "The content to be displayed inside the button"
+  attr :route, :string, default: nil, doc: "The router action for adding new object"
 
   def add_button(assigns) do
     ~H"""
-    <div class="my-4">
-      <.link href={@link} class="rounded-full p-3 text-white bg-gray-800 hover:bg-gray-600">
-        <.icon name="hero-plus-circle" /> <%= @action %>
-      </.link>
-    </div>
+    <.link
+      href={@route}
+      class="inline-flex items-center"
+    >
+      <.icon name="hero-plus-circle" /> <%= render_slot(@inner_block) %>
+    </.link>
     """
   end
 
-  attr :link, :string, required: true
-  attr :action, :string, required: true
+  slot :inner_block, required: true, doc: "The content to be displayed inside the button"
+  attr :route, :string, default: nil, doc: "The router action for adding new object"
 
   def add_live_button(assigns) do
     ~H"""
-    <div class="my-4">
-      <.link patch={@link} class="rounded-full p-3 text-white bg-gray-800 hover:bg-gray-600">
-        <.icon name="hero-plus-circle" /> <%= @action %>
+      <.link patch={@route} class="inline-flex items-center">
+        <.icon name="hero-plus-circle" /> <%= render_slot(@inner_block) %>
       </.link>
-    </div>
     """
   end
-
-  # slot :inner_block, required: true
-
-  # def h2(assigns) do
-  #   ~H"""
-  #   <h2 class="text-xl font-bold mt-4">
-  #     <%= render_slot(@inner_block) %>
-  #   </h2>
-  #   """
-  # end
 
   attr :disabled, :boolean, default: false
   def button_next_page(assigns) do

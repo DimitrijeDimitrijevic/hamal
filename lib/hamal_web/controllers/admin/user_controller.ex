@@ -2,9 +2,24 @@ defmodule HamalWeb.Admin.UserController do
   use HamalWeb, :controller
   alias Hamal.Accounts
 
+
+  def index(conn, %{"query" => "", "type" => ""}) do
+    users = Accounts.get_users()
+    conn
+    |> put_flash(:warning, "Search not valid!")
+    |> render(:index, users: users, search: false)
+  end
+
+  def index(conn, %{"query" => query, "type" => type}) do
+    type = String.downcase(type) |> String.trim() |> String.to_atom()
+    query = String.downcase(query) |> String.trim()
+    users = Accounts.search_users(query, type)
+    render(conn, :index, users: users, search: true)
+  end
+
   def index(conn, _) do
     users = Accounts.get_users()
-    render(conn, :index, users: users)
+    render(conn, :index, users: users, search: false)
   end
 
   def new(conn, _) do
