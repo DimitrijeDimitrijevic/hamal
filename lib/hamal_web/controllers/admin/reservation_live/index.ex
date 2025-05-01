@@ -81,29 +81,51 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
           socket =
             socket
             |> assign(reservation: to_form(changeset, action: :insert))
-            |> put_flash(:error, "Please correct errors in input to continue!")
+            |> put_flash(:error, "Please correct errors to continue!")
 
           {:noreply, socket}
       end
     end
   end
 
+  # TODO refactor logic
+
+  # @impl true
+  # def handle_event(
+  #       "filter-check-in-rooms",
+  #       %{"reservation" => %{"check_in" => check_in_date}},
+  #       socket
+  #     ) do
+  #   {:ok, check_in_date} = Date.from_iso8601(check_in_date)
+
+  #   available_rooms = reservable_rooms(check_in_date)
+
+  #   socket =
+  #     socket
+  #     |> assign(rooms: available_rooms)
+
+  #   {:noreply, socket}
+  # end
+
+
+  ############# Reservations search ####################################
   @impl true
-  def handle_event(
-        "filter-check-in-rooms",
-        %{"reservation" => %{"check_in" => check_in_date}},
-        socket
-      ) do
-    {:ok, check_in_date} = Date.from_iso8601(check_in_date)
-
-    available_rooms = reservable_rooms(check_in_date)
-
-    socket =
-      socket
-      |> assign(rooms: available_rooms)
-
+  def handle_event("search-reservations", %{"reservation_id" => ""}, socket) do
+    reservations = Bookings.get_all_reservations()
+    socket = assign(socket, reservations: reservations)
     {:noreply, socket}
   end
+
+  @impl true
+  def handle_event("search-reservations", %{"reservation_id" => id}, socket) do
+    id = id |> String.trim() |> String.to_integer()
+    searched_reservations = Bookings.search_reservations_by_id(id)
+
+    socket = assign(socket, reservations: searched_reservations)
+
+   {:noreply, socket}
+  end
+  #####################################################################
 
   #### NEW ACTION ####
   defp apply_live_action(_params, :new, socket) do
@@ -113,7 +135,6 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     rooms = reservable_rooms()
     reservation_channels = Constants.reservation_channel_types()
 
-    dbg(reservation)
 
     socket
     |> assign(room_error: false)
@@ -128,7 +149,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
     socket
     |> assign(action: :index)
-    |> stream(:reservations, reservations)
+    |> assign(reservations: reservations)
   end
 
   #### EDIT ACTION ####
@@ -231,31 +252,38 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   @impl true
   def render(%{action: :index} = assigns) do
     ~H"""
-    <.add_live_button link={~p"/admin/reservations/new"} action="Create Reservation" />
+    <h2> Reservations </h2>
+
+    <div class="mt-4 flex flex-row gap-4 border-t">
+    <.add_live_button route={~p"/admin/reservations/new"}> Create reservation </.add_live_button>
+    <.form :let={f} for={%{}} phx-change="search-reservations">
+    <.input field={f[:reservation_id]}  type="text" placeholder="reservation id"/>
+    </.form>
+    </div>
 
     <.table
       id="reservations"
-      rows={@streams.reservations}
-      row_click={fn {_id, reservation} -> JS.patch(~p"/admin/reservations/#{reservation}/edit") end}
+      rows={@reservations}
+      row_click={fn reservation -> JS.patch(~p"/admin/reservations/#{reservation}/edit") end}
     >
-      <:col :let={{_id, reservation}} label="ID">{reservation.id}</:col>
-      <:col :let={{_id, reservation}} label="Check In">{date(reservation.check_in)}</:col>
-      <:col :let={{_id, reservation}} label="Check Out">{date(reservation.check_out)}</:col>
-      <:col :let={{_id, reservation}} label="Name">{reservation.guest_name}</:col>
-      <:col :let={{_id, reservation}} label="Surname">{reservation.guest_surname}</:col>
-      <:col :let={{_id, reservation}} label="Nights">{reservation.no_of_nights}</:col>
-      <:col :let={{_id, reservation}} label="Contact number">{reservation.contact_number}</:col>
-      <:col :let={{_id, reservation}} label="Channel">{reservation.channel}</:col>
-      <:col :let={{_id, reservation}} label="Rooms">{reserved_rooms(reservation.rooms)}</:col>
+      <:col :let={reservation} label="ID">{reservation.id}</:col>
+      <:col :let={reservation} label="Check In">{date(reservation.check_in)}</:col>
+      <:col :let={reservation} label="Check Out">{date(reservation.check_out)}</:col>
+      <:col :let={reservation} label="Name">{reservation.guest_name}</:col>
+      <:col :let={reservation} label="Surname">{reservation.guest_surname}</:col>
+      <:col :let={reservation} label="Nights">{reservation.no_of_nights}</:col>
+      <:col :let={reservation} label="Contact number">{reservation.contact_number}</:col>
+      <:col :let={reservation} label="Channel">{reservation.channel}</:col>
+      <:col :let={reservation} label="Rooms">{reserved_rooms(reservation.rooms)}</:col>
     </.table>
     """
   end
 
   def render(%{action: :new} = assigns) do
     ~H"""
-    <h3> New reservation </h3>
-    <p> Create new reservation </p>
-    <div>
+    <h2> New reservation </h2>
+    <div class="flex flex-row gap-4 mb-4">
+    <div class="w-1/2">
       <.simple_form for={@reservation} phx-change="validate" phx-submit="create">
         <.input field={@reservation[:guest_name]} type="text" label="Name" field_required={true} />
         <.input
@@ -269,27 +297,24 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
           type="date"
           label="Check in"
           field_required={true}
-          phx-change="filter-check-in-rooms"
         />
         <.input
           field={@reservation[:no_of_nights]}
-          type="number"
+          type="text"
           label="Number of nights"
-          field_required={true}
-          min="1"
-          max="30"
+          disabled
         />
         <.input field={@reservation[:check_out]} type="date" label="Check out" field_required={true} />
         <%= if @room_error do %>
           <.error>{@room_error_message}</.error>
         <% end %>
         <!-- Begin Add Button -->
-        <div class="grid">
-          <label class="text-green-500 w-1/3 p-1 pr-2 rounded-full border border-green-500 cursor-pointer">
+        <div>
+        <label class="w-1/3 p-1 pr-2 rounded-full border border-black hover:border-zinc-500 cursor-pointer">
             <.icon name="hero-plus-circle" />
             <input class="hidden" type="checkbox" name="reservation[room_order][]" /> Add Room
           </label>
-        </div>
+          </div>
         <!-- End Add Button -->
         <.inputs_for :let={room} field={@reservation[:rooms]}>
           <div class="grid grid-cols-2">
@@ -301,7 +326,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
               field_required={true}
             />
             <div class="mt-auto">
-              <label class="text-white flex bg-red-500 h-1/2 ml-10 rounded-full w-2/3 pr-2 py-1 border border-red-500 cursor-pointer">
+              <label class="flex h-1/2 ml-10 rounded-full w-1/3 pr-2 py-1 border border-black hover:border-zinc-500 cursor-pointer">
                 <.icon name="hero-minus-circle" />
                 <input
                   class="hidden"
@@ -314,8 +339,8 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
            </div>
         </.inputs_for>
         <.input type="checkbox" name="breakfast" label="Breakfast" />
-        <.input type="email" label="Email" field={@reservation[:contact_email]} />
-        <.input type="tel" label="Phone number" field={@reservation[:contact_number]} />
+        <.input type="email" label="Email" field={@reservation[:contact_email]} field_required={true}/>
+        <.input type="tel" label="Phone number" field={@reservation[:contact_number]}  field_required={true}/>
         <.input type="text" label="Company name" field={@reservation[:company_name]} />
         <.input type="text" label="Company VAT number" field={@reservation[:company_vat]} />
         <.input
@@ -323,26 +348,29 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
           label="Channel"
           field={@reservation[:channel]}
           options={@reservation_channels}
+          field_required={true}
         />
         <.input type="textarea" field={@reservation[:notes]} label="Notes" />
 
         <:actions>
-          <.button phx-disable-with="Creating reservation..." class="w-1/2">Create</.button>
+          <.button phx-disable-with="Creating reservation...">Create</.button>
           <.link
-            href={~p"/admin/reservations"}
-            class="text-white bg-red-500 hover:bg-red-400 w-1/2 text-center rounded-lg py-2 px-3 font-semibold"
+            patch={~p"/admin/reservations"}
           >
             Cancel
           </.link>
         </:actions>
       </.simple_form>
     </div>
+    </div>
     """
   end
 
   def render(%{action: :edit} = assigns) do
     ~H"""
-    <div class="mx-auto max-w-xl">
+    <h2> Edit reservation </h2>
+    <div class="flex flex-row gap-4 mb-4">
+    <div class="w-1/2">
       <.simple_form for={@reservation} phx-change="validate" phx-submit="create">
         <.input field={@reservation[:guest_name]} type="text" label="Name" field_required={true} />
         <.input
@@ -356,28 +384,24 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
           type="date"
           label="Check in"
           field_required={true}
-          phx-change="filter-check-in-rooms"
-          value={Date.utc_today()}
         />
         <.input
           field={@reservation[:no_of_nights]}
-          type="number"
+          type="text"
           label="Number of nights"
-          field_required={true}
-          min="1"
-          max="30"
+          disabled
         />
         <.input field={@reservation[:check_out]} type="date" label="Check out" field_required={true} />
         <%= if @room_error do %>
           <.error>{@room_error_message}</.error>
         <% end %>
         <!-- Begin Add Button -->
-        <div class="grid">
-          <label class="text-green-500 w-1/3 p-1 pr-2 rounded-full border border-green-500 cursor-pointer">
+        <div>
+        <label class="w-1/3 p-1 pr-2 rounded-full border border-black hover:border-zinc-500 cursor-pointer">
             <.icon name="hero-plus-circle" />
             <input class="hidden" type="checkbox" name="reservation[room_order][]" /> Add Room
           </label>
-        </div>
+          </div>
         <!-- End Add Button -->
         <.inputs_for :let={room} field={@reservation[:rooms]}>
           <div class="grid grid-cols-2">
@@ -389,7 +413,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
               field_required={true}
             />
             <div class="mt-auto">
-              <label class="text-white flex bg-red-500 h-1/2 ml-10 rounded-full w-2/3 pr-2 py-1 border border-red-500 cursor-pointer">
+              <label class="flex h-1/2 ml-10 rounded-full w-1/3 pr-2 py-1 border border-black hover:border-zinc-500 cursor-pointer">
                 <.icon name="hero-minus-circle" />
                 <input
                   class="hidden"
@@ -399,11 +423,11 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
                 /> Delete
               </label>
             </div>
-          </div>
+           </div>
         </.inputs_for>
         <.input type="checkbox" name="breakfast" label="Breakfast" />
-        <.input type="email" label="Email" field={@reservation[:contact_email]} />
-        <.input type="tel" label="Phone number" field={@reservation[:contact_number]} />
+        <.input type="email" label="Email" field={@reservation[:contact_email]} field_required={true}/>
+        <.input type="tel" label="Phone number" field={@reservation[:contact_number]}  field_required={true}/>
         <.input type="text" label="Company name" field={@reservation[:company_name]} />
         <.input type="text" label="Company VAT number" field={@reservation[:company_vat]} />
         <.input
@@ -411,19 +435,20 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
           label="Channel"
           field={@reservation[:channel]}
           options={@reservation_channels}
+          field_required={true}
         />
         <.input type="textarea" field={@reservation[:notes]} label="Notes" />
 
         <:actions>
-          <.button phx-disable-with="Creating reservation..." class="w-1/2">Create</.button>
+          <.button phx-disable-with="Creating reservation...">Create</.button>
           <.link
-            href={~p"/admin/reservations"}
-            class="text-white bg-red-500 hover:bg-red-400 w-1/2 text-center rounded-lg py-2 px-3 font-semibold"
+            patch={~p"/admin/reservations"}
           >
             Cancel
           </.link>
         </:actions>
       </.simple_form>
+    </div>
     </div>
     """
   end

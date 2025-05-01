@@ -91,9 +91,9 @@ defmodule Hamal.Clients do
   end
 
   def get_company_by_vat_and_name(company_vat, company_name)
+  def get_company_by_vat_and_name(nil, nil), do: nil
   def get_company_by_vat_and_name(nil, company_name), do: get_company_by_name(company_name)
   def get_company_by_vat_and_name(company_vat, nil), do: get_company_by_vat(company_vat)
-  def get_company_by_vat_and_name(nil, nil), do: nil
 
   def get_company_by_vat_and_name(company_vat, company_name) do
     from(c in Company, where: c.vat == ^company_vat and c.name == ^company_name, select: c)

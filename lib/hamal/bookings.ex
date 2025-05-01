@@ -93,12 +93,14 @@ defmodule Hamal.Bookings do
       reservation_multi(params, room_ids)
       |> Repo.transaction()
 
+      dbg(result)
     case result do
       {:ok, %{reservation: reservation}} ->
         {:ok, reservation}
 
       {:error, operation, changeset, _changes} ->
         case operation do
+          :new_reservation -> {:error, changeset}
           :reservation -> {:error, changeset}
           _ -> {:error, :other_failure}
         end
@@ -149,6 +151,12 @@ defmodule Hamal.Bookings do
       ])
     end)
     |> dbg()
+  end
+
+  def search_reservations_by_id(reservation_id) do
+    (from reservation in Reservation, where: reservation.id == ^reservation_id, select: reservation)
+    |> Repo.all
+    |> Repo.preload(:rooms)
   end
 
   def get_rooms_by_ids(room_ids) do

@@ -42,6 +42,5 @@ defmodule Hamal.Clients.Company do
   def changeset_from_reservation(company, params \\ %{}) do
     company
     |> cast(params, @permitted)
-    |> validate_required([:name])
   end
 end
