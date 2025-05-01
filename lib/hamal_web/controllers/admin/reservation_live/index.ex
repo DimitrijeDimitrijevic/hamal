@@ -132,16 +132,16 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     today = Date.utc_today()
     reservation = Bookings.new_reservation(%{check_in: today}) |> to_form()
 
-    rooms = reservable_rooms()
-    reservation_channels = Constants.reservation_channel_types()
+    rooms = Bookings.get_reservable_rooms()
+    # reservation_channels = Constants.reservation_channel_types()
 
 
     socket
-    |> assign(room_error: false)
-    |> assign(action: :new)
+    # |> assign(room_error: false)
+    |> assign(action: :new1)
     |> assign(reservation: reservation)
     |> assign(rooms: rooms)
-    |> assign(reservation_channels: reservation_channels)
+    # |> assign(reservation_channels: reservation_channels)
   end
 
   defp apply_live_action(_params, :index, socket) do
@@ -279,6 +279,19 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     """
   end
 
+  def render(%{action: :new1} = assigns) do
+      ~H"""
+      <.form for={@reservation} phx-submit="create">
+        <%= for room <- @rooms do %>
+        <label for={room.id}> {room.number}
+        <input type="checkbox" name="reservation[room_ids][]" id={"room#{room.id}"} value={room.id} %>
+        </label>
+        <% end %>
+        <button> Submit </button>
+      </.form>
+      """
+  end
+
   def render(%{action: :new} = assigns) do
     ~H"""
     <h2> New reservation </h2>
@@ -411,6 +424,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
               label="Select room/s"
               options={@rooms}
               field_required={true}
+              value={room.index}
             />
             <div class="mt-auto">
               <label class="flex h-1/2 ml-10 rounded-full w-1/3 pr-2 py-1 border border-black hover:border-zinc-500 cursor-pointer">
