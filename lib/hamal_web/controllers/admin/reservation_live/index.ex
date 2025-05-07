@@ -18,13 +18,15 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
   @impl true
   def handle_event("validate", %{"reservation" => params}, socket) do
-    dbg(params)
 
+    # {room_error, room_error_msg} =
+    #   validate_rooms_selection(params["rooms"]) |> handle_room_error()
 
     # reservation = validate_reservation_form(params)
 
     # socket =
     #   socket
+    #   |> assign(room_error: room_error)
     #   |> assign(room_error_message: room_error_msg)
     #   |> assign(reservation: reservation)
     #   |> assign(rooms: socket.assigns.rooms)
@@ -34,57 +36,43 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
   @impl true
   def handle_event("create", %{"reservation" => params}, socket) do
-    {room_error, room_error_msg} =
-      validate_rooms_selection(params["rooms"]) |> handle_room_error()
 
-    reservation = validate_reservation_form(params)
-
-    if room_error do
-      socket =
-        socket
-        |> assign(room_error: room_error)
-        |> assign(room_error_message: room_error_msg)
-        |> assign(reservation: reservation)
-        |> assign(rooms: socket.assigns.rooms)
-        |> put_flash(:error, "Please correct errors in inputs to continue!")
 
       {:noreply, socket}
-    else
-      room_ids = extract_room_ids(params["rooms"]) |> Enum.reject(&is_nil(&1)) |> Enum.uniq()
 
-      case Bookings.create_reservation(params, room_ids) do
-        {:ok, reservation} ->
-          Hamal.Emails.Bookings.confirmation_email(reservation)
-          |> Hamal.Mailer.deliver()
+    #   case Bookings.create_reservation(params, room_ids) do
+    #     {:ok, reservation} ->
+    #       Hamal.Emails.Bookings.confirmation_email(reservation)
+    #       |> Hamal.Mailer.deliver()
 
 
-          socket =
-            socket
-            |> put_flash(:info, "Reservation created successfully!")
-            |> push_patch(to: ~p"/admin/reservations")
+    #       socket =
+    #         socket
+    #         |> put_flash(:info, "Reservation created successfully!")
+    #         |> push_patch(to: ~p"/admin/reservations")
 
-          {:noreply, socket}
+    #       {:noreply, socket}
 
-        {:error, :other_failure} ->
-          socket =
-            socket
-            |> put_flash(
-              :error,
-              "An error occurred while creating reservation. Please contact support!"
-            )
-            |> push_patch(to: ~p"/admin/reservations")
+    #     {:error, :other_failure} ->
+    #       socket =
+    #         socket
+    #         |> put_flash(
+    #           :error,
+    #           "An error occurred while creating reservation. Please contact support!"
+    #         )
+    #         |> push_patch(to: ~p"/admin/reservations")
 
-          {:noreply, socket}
+    #       {:noreply, socket}
 
-        {:error, changeset} ->
-          socket =
-            socket
-            |> assign(reservation: to_form(changeset, action: :insert))
-            |> put_flash(:error, "Please correct errors to continue!")
+    #     {:error, changeset} ->
+    #       socket =
+    #         socket
+    #         |> assign(reservation: to_form(changeset, action: :insert))
+    #         |> put_flash(:error, "Please correct errors to continue!")
 
-          {:noreply, socket}
-      end
-    end
+    #       {:noreply, socket}
+    #   end
+    # end
   end
 
 
@@ -112,7 +100,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     today = Date.utc_today()
     reservation = Bookings.new_reservation(%{check_in: today}) |> to_form()
 
-    rooms = Bookings.get_reservable_rooms()
+    rooms = Bookings.get_reservable_rooms() |> rooms_list()
     reservation_channels = Constants.reservation_channel_types()
 
 
@@ -165,6 +153,16 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     |> Reservation.changeset(reservation_params)
     |> to_form(action: :validate)
   end
+
+  defp rooms_list(rooms) do
+    Enum.map(rooms, fn room -> room_label(room) end)
+  end
+
+  defp room_label(room) do
+    room_label = "#{room.number} - #{room.no_of_beds} bed(s)"
+    %{label: room_label, id: room.id}
+  end
+
 
   # View helper to list numbers for reserved rooms
   def reserved_rooms([room]), do: "#{room.number}"
@@ -257,8 +255,8 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
         <div class="grid grid-cols-2 gap-2 border-b-2 border-t-2">
         <%= for room <- @rooms do %>
           <div>
-          <label class="block text-sm font-semibold leading-6 text-zinc-800" for={room.id}> {room.number} - {room.no_of_beds}
-            <input type="checkbox" class="rounded-md"   name="reservation[room_ids][]" value={room.id} %>
+          <label class="block text-sm font-semibold leading-6 text-zinc-800"> {room.label}
+            <input type="checkbox" class="rounded-md" name="reservation[room_ids][]" value={room.id} %>
           </label>
           </div>
         <% end %>
