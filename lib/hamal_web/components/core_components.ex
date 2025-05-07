@@ -19,6 +19,27 @@ defmodule HamalWeb.CoreComponents do
   alias Phoenix.LiveView.JS
   import HamalWeb.Gettext
 
+
+  attr :rooms, :list, default: []
+  def rooms_selection(assigns) do
+    ~H"""
+    <div class="grid grid-cols-4 gap-4">
+    <%= for room <- @rooms do %>
+      <div>
+      <label for={room.id}> {room.number} - {room.no_of_beds}
+        <input type="checkbox" class=""  name="reservation[room_ids][]" value={room.id} %>
+      </label>
+      </div>
+    <% end %>
+    </div>
+  """
+  end
+
+
+  @doc """
+    Custom pagination component, logic for fetching from database
+    should be applied on controller or in LiveView, since logic can be different for some use cases.
+  """
   attr :pagination, :boolean, default: false
   attr :current_page, :integer, default: 0
   attr :no_of_pages, :integer, default: 0

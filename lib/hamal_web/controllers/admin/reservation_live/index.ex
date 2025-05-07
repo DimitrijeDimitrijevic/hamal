@@ -18,17 +18,16 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
   @impl true
   def handle_event("validate", %{"reservation" => params}, socket) do
-    {room_error, room_error_msg} =
-      validate_rooms_selection(params["rooms"]) |> handle_room_error()
+    dbg(params)
 
-    reservation = validate_reservation_form(params)
 
-    socket =
-      socket
-      |> assign(room_error: room_error)
-      |> assign(room_error_message: room_error_msg)
-      |> assign(reservation: reservation)
-      |> assign(rooms: socket.assigns.rooms)
+    # reservation = validate_reservation_form(params)
+
+    # socket =
+    #   socket
+    #   |> assign(room_error_message: room_error_msg)
+    #   |> assign(reservation: reservation)
+    #   |> assign(rooms: socket.assigns.rooms)
 
     {:noreply, socket}
   end
@@ -88,25 +87,6 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     end
   end
 
-  # TODO refactor logic
-
-  # @impl true
-  # def handle_event(
-  #       "filter-check-in-rooms",
-  #       %{"reservation" => %{"check_in" => check_in_date}},
-  #       socket
-  #     ) do
-  #   {:ok, check_in_date} = Date.from_iso8601(check_in_date)
-
-  #   available_rooms = reservable_rooms(check_in_date)
-
-  #   socket =
-  #     socket
-  #     |> assign(rooms: available_rooms)
-
-  #   {:noreply, socket}
-  # end
-
 
   ############# Reservations search ####################################
   @impl true
@@ -133,15 +113,15 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     reservation = Bookings.new_reservation(%{check_in: today}) |> to_form()
 
     rooms = Bookings.get_reservable_rooms()
-    # reservation_channels = Constants.reservation_channel_types()
+    reservation_channels = Constants.reservation_channel_types()
 
 
     socket
     # |> assign(room_error: false)
-    |> assign(action: :new1)
+    |> assign(action: :new)
     |> assign(reservation: reservation)
     |> assign(rooms: rooms)
-    # |> assign(reservation_channels: reservation_channels)
+    |> assign(reservation_channels: reservation_channels)
   end
 
   defp apply_live_action(_params, :index, socket) do
@@ -186,56 +166,6 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     |> to_form(action: :validate)
   end
 
-  defp validate_rooms_selection(room_params) do
-    room_ids = extract_room_ids(room_params)
-
-    # Check if there is nil value in the list
-    # Valid ids are the one which are integers, nil is not valid, that will be first selection
-    valid_ids? =
-      if is_nil(room_ids),
-        do: false,
-        else: Enum.all?(room_ids, fn room_id -> not is_nil(room_id) end)
-
-    if valid_ids? do
-      room_ids = Enum.reject(room_ids, fn id -> is_nil(id) end)
-      unique_ids = Enum.uniq(room_ids)
-
-      if Enum.count(unique_ids) == Enum.count(room_ids) do
-        {:ok, :valid_selection}
-      else
-        {:error, :duplicate_selected}
-      end
-    else
-      {:error, :not_selected}
-    end
-  end
-
-  defp extract_room_ids(nil), do: nil
-
-  defp extract_room_ids(rooms_params) do
-    rooms_params
-    |> Enum.map(fn {_, room} ->
-      if room["room_id"] == "", do: nil, else: String.to_integer(room["room_id"])
-    end)
-  end
-
-  defp rooms_list(rooms) do
-    rooms = Enum.map(rooms, fn room -> room_label(room) end)
-    [{"Select room", nil} | rooms]
-  end
-
-  defp room_label(room) do
-    {"#{room.number} - #{room.no_of_beds} bed(s)", room.id}
-  end
-
-  defp handle_room_error({:error, :duplicate_selected}),
-    do: {true, "Duplicate rooms selected, please make sure you do not have same rooms selected."}
-
-  defp handle_room_error({:error, :not_selected}),
-    do: {true, "Please select at least one room per reservation"}
-
-  defp handle_room_error({:ok, _}), do: {false, ""}
-
   # View helper to list numbers for reserved rooms
   def reserved_rooms([room]), do: "#{room.number}"
 
@@ -279,18 +209,22 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     """
   end
 
-  def render(%{action: :new1} = assigns) do
-      ~H"""
-      <.form for={@reservation} phx-submit="create">
-        <%= for room <- @rooms do %>
-        <label for={room.id}> {room.number}
-        <input type="checkbox" name="reservation[room_ids][]" id={"room#{room.id}"} value={room.id} %>
-        </label>
-        <% end %>
-        <button> Submit </button>
-      </.form>
-      """
-  end
+  # def render(%{action: :new1} = assigns) do
+  #     ~H"""
+  #     <.form for={@reservation} phx-submit="create">
+  #     <div class="grid grid-cols-4 gap-1">
+  #     <%= for room <- @rooms do %>
+  #       <div>
+  #       <label for={room.id}> {room.number} - {room.no_of_beds}
+  #         <input type="checkbox" class=""  name="reservation[room_ids][]" value={room.id} %>
+  #       </label>
+  #       </div>
+  #     <% end %>
+  #     </div>
+  #       <.button> Submit </.button>
+  #     </.form>
+  #     """
+  # end
 
   def render(%{action: :new} = assigns) do
     ~H"""
@@ -318,7 +252,18 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
           disabled
         />
         <.input field={@reservation[:check_out]} type="date" label="Check out" field_required={true} />
-        <%= if @room_error do %>
+
+        <label class="block text-sm font-semibold leading-6 text-zinc-800"> <span class="text-md text-red-500">*</span>Select available rooms </label>
+        <div class="grid grid-cols-2 gap-2 border-b-2 border-t-2">
+        <%= for room <- @rooms do %>
+          <div>
+          <label class="block text-sm font-semibold leading-6 text-zinc-800" for={room.id}> {room.number} - {room.no_of_beds}
+            <input type="checkbox" class="rounded-md"   name="reservation[room_ids][]" value={room.id} %>
+          </label>
+          </div>
+        <% end %>
+        </div>
+        <%!-- <%= if @room_error do %>
           <.error>{@room_error_message}</.error>
         <% end %>
         <!-- Begin Add Button -->
@@ -350,7 +295,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
               </label>
             </div>
            </div>
-        </.inputs_for>
+        </.inputs_for> --%>
         <.input type="checkbox" name="breakfast" label="Breakfast" />
         <.input type="email" label="Email" field={@reservation[:contact_email]} field_required={true}/>
         <.input type="tel" label="Phone number" field={@reservation[:contact_number]}  field_required={true}/>
