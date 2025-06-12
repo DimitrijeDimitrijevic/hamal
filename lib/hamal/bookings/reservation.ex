@@ -65,23 +65,18 @@ defmodule Hamal.Bookings.Reservation do
 
   def create_changeset(reservation, rooms, params \\ %{}) do
     reservation
-    |> cast(params, @permitted)
-    |> validate_required(@required)
+    |> validate_changeset(params)
     |> put_assoc(:rooms, rooms)
     |> Changeset.normalize_name(:guest_name)
     |> Changeset.normalize_name(:guest_surname)
-    |> handle_check_in_check_out_dates()
   end
 
-  def changeset(reservation, params \\ %{}) do
+  def validate_changeset(reservation, params \\ %{}) do
     reservation
     |> cast(params, @permitted)
     |> validate_required(@required)
     |> validate_contact_info()
-    |> cast_assoc(:rooms,
-     sort_param: :room_order,
-     drop_param: :room_delete
-        )
+    |> handle_check_in_check_out_dates()
     |> handle_number_of_nights()
   end
 
@@ -89,13 +84,8 @@ defmodule Hamal.Bookings.Reservation do
   def new_changeset(reservation, params \\ %{}) do
     reservation
     |> cast(params, @permitted)
-    |> assing_empty_rooms_list()
   end
 
-  defp assing_empty_rooms_list(%Ecto.Changeset{} = changeset) do
-    rooms = [%Room{}]
-    put_change(changeset, :rooms, rooms)
-  end
 
   defp handle_check_in_check_out_dates(cs_map, today \\ Date.utc_today())
 
@@ -108,31 +98,24 @@ defmodule Hamal.Bookings.Reservation do
 
     cs =
       if check_in_past,
-        do: add_error(cs, :check_in, "Check in date can not be in the past"),
+        do: add_error(cs, :check_in, "Check in date cannot be in the past"),
         else: cs
 
     if check_out_past,
-      do: add_error(cs, :check_out, "Check out date can not be in the past"),
+      do: add_error(cs, :check_out, "Check out date cannot be in the past"),
       else: cs
   end
 
 
 
 
-  defp handle_number_of_nights(%{changes: %{check_out: check_out}} = changeset) do
+  defp handle_number_of_nights(changeset) do
+    check_out = get_field(changeset, :check_out)
     check_in = get_field(changeset, :check_in)
     no_of_nights = Date.diff(check_out, check_in)
-
-    if no_of_nights > @max_number_of_nights do
-      changeset
-      |> add_error(:check_out, "must be maximum #{@max_number_of_nights} days")
-      |> put_change(:check_out, Date.shift(check_in, day: @max_number_of_nights))
-      else
-      put_change(changeset, :no_of_nights, no_of_nights)
-    end
+    put_change(changeset, :no_of_nights, no_of_nights)
   end
 
-  defp handle_number_of_nights(changeset), do: changeset
 
 
   defp validate_contact_info(changeset) do
@@ -151,7 +134,6 @@ defmodule Hamal.Bookings.Reservation do
   defp validate_contact_phone(changeset) do
     changeset
     |> validate_required(:contact_number)
-    # |> validate_format(:contact_phone, regex_expression)
     |> validate_length(:contact_number, max: 25)
   end
 end

@@ -1,32 +1,35 @@
 <div class="flex flex-row h-full mt-1">
-<div class="flex-col border-r-2 min-h-screen">
-<p class="p-2"> <a href={~p"/admin/"}> Main menu </a> </p>
-<hr>
-  <ul class="m-2">
-    <li class="mb-2 mt-2">
-      <a href={~p"/admin/users"}>Users</a>
-    </li>
-    <li class="mb-2 mt-2">
-      <a href={~p"/admin/rooms"}>Rooms</a>
-    </li>
-    <li class="mb-2 mt-2">
-      <a href={~p"/admin/reservations"}>
-        Reservations
-      </a>
-    </li>
-    <li class="mb-2 mt-2">
-      <a href={~p"/admin/guests"}>Guest book</a>
-    </li>
-    <li class="mb-2 mt-2">
-    <a href={~p"/admin/receipts"}>Reciepts</a>
-    </li>
-  </ul>
-</div>
+  <div class="flex-col border-r-2 min-h-screen w-64">
+    <p class="p-2"><a href={~p"/admin/"}> Main menu </a></p>
+    <hr />
+    <ul class="m-2">
+      <li class="mb-2 mt-2 underline">
+        <a href={~p"/admin/users"}>Users</a>
+      </li>
+      <li class="mb-2 mt-2 underline">
+        <a href={~p"/admin/rooms"}>Rooms</a>
+      </li>
+      <li class="mb-2 mt-2 underline">
+        <a href={~p"/admin/reservations"}>
+          Reservations
+        </a>
+      </li>
+      <li class="mb-2 mt-2 underline">
+        <a href={~p"/admin/guests"}>Guest book</a>
+      </li>
+      <li class="mb-2 mt-2 underline">
+        <a href={~p"/admin/receipts"}>Reciepts</a>
+      </li>
+    </ul>
+  </div>
   <div>
     <.flash_group flash={@flash} />
   </div>
   <main class="w-full px-4 pr-4">
-  <!--- Main Content of the page from other templates --->
-    <%= @inner_content %>
-</main>
+    <!--- Main Content of the page from other templates --->
+    {@inner_content}
+    
+
+
+  </main>
 </div>

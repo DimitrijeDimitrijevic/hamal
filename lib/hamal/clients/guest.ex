@@ -60,7 +60,7 @@ defmodule Hamal.Clients.Guest do
 
   def changeset_from_reservation(guest, params \\ %{}) do
     guest
-    |> cast(params, [:name, :surname])
+    |> cast(params, [:name, :surname, :phone, :email])
     |> Changeset.normalize_name(:name)
     |> Changeset.normalize_name(:surname)
   end

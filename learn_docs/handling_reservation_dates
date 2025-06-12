@@ -1,0 +1,9 @@
+We keep state of each date in socket assings.
+
+When check in is changed we update socket check_in_date assign, with this we can access it in check_out_date change
+This also applies when check_out_date is change
+This also applies on whole reservation validation in validate event.
+
+Before querying for available rooms, we need to make sure that dates are in present time or future.
+
+In form we should also handle in validation event if the check_in, check_out date are in the past

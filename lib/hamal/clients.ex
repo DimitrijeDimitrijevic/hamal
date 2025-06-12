@@ -75,8 +75,13 @@ defmodule Hamal.Clients do
     Repo.get_by(Guest, id: guest_id)
   end
 
-  def get_guest(guest_name, guest_surname) do
-    from(g in Guest, where: g.name == ^guest_name and g.surname == ^guest_surname, select: g)
+  def get_guest(guest_name, guest_surname, phone, email) do
+    from(g in Guest,
+      where:
+        g.name == ^guest_name and g.surname == ^guest_surname and
+          g.phone == ^phone and g.email == ^email,
+      select: g
+    )
     |> Repo.one()
   end
 
@@ -91,9 +96,9 @@ defmodule Hamal.Clients do
   end
 
   def get_company_by_vat_and_name(company_vat, company_name)
-  def get_company_by_vat_and_name(nil, nil), do: nil
-  def get_company_by_vat_and_name(nil, company_name), do: get_company_by_name(company_name)
-  def get_company_by_vat_and_name(company_vat, nil), do: get_company_by_vat(company_vat)
+  def get_company_by_vat_and_name(nil, nil), do: {nil, nil}
+  def get_company_by_vat_and_name(nil, company_name), do: {:ok, get_company_by_name(company_name)}
+  def get_company_by_vat_and_name(company_vat, nil), do: {:ok, get_company_by_vat(company_vat)}
 
   def get_company_by_vat_and_name(company_vat, company_name) do
     from(c in Company, where: c.vat == ^company_vat and c.name == ^company_name, select: c)

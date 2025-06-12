@@ -26,8 +26,8 @@ defmodule HamalWeb.CoreComponents do
     <div class="grid grid-cols-4 gap-4">
     <%= for room <- @rooms do %>
       <div>
-      <label for={room.id}> {room.number} - {room.no_of_beds}
-        <input type="checkbox" class=""  name="reservation[room_ids][]" value={room.id} %>
+      <label class="block text-sm font-semibold leading-6 text-zinc-800"> {room.label}
+        <input type="checkbox" class="rounded-md" name="reservation[room_ids][]" value={room.id} %>
       </label>
       </div>
     <% end %>
