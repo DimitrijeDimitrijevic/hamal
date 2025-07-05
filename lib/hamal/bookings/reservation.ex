@@ -1,10 +1,10 @@
 defmodule Hamal.Bookings.Reservation do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Hamal.Bookings.Room
+  # alias Hamal.Bookings.Room
   alias Hamal.Helpers.Changeset
 
-  @max_number_of_nights 30
+  # @max_number_of_nights 30
 
   @permitted [
     :check_in,
@@ -62,13 +62,18 @@ defmodule Hamal.Bookings.Reservation do
     timestamps(type: :utc_datetime)
   end
 
-
   def create_changeset(reservation, rooms, params \\ %{}) do
     reservation
     |> validate_changeset(params)
     |> put_assoc(:rooms, rooms)
     |> Changeset.normalize_name(:guest_name)
     |> Changeset.normalize_name(:guest_surname)
+  end
+
+  def update_changeset(reservation, rooms, params \\ %{}) do
+    reservation
+    |> validate_changeset(params)
+    |> put_assoc(:rooms, rooms)
   end
 
   def validate_changeset(reservation, params \\ %{}) do
@@ -80,12 +85,15 @@ defmodule Hamal.Bookings.Reservation do
     |> handle_number_of_nights()
   end
 
+  def changeset(reservation, params \\ %{}) do
+    cast(reservation, params, @permitted)
+  end
+
   # on new we do not have any rooms present in reservation
   def new_changeset(reservation, params \\ %{}) do
     reservation
     |> cast(params, @permitted)
   end
-
 
   defp handle_check_in_check_out_dates(cs_map, today \\ Date.utc_today())
 
@@ -106,17 +114,12 @@ defmodule Hamal.Bookings.Reservation do
       else: cs
   end
 
-
-
-
   defp handle_number_of_nights(changeset) do
     check_out = get_field(changeset, :check_out)
     check_in = get_field(changeset, :check_in)
     no_of_nights = Date.diff(check_out, check_in)
     put_change(changeset, :no_of_nights, no_of_nights)
   end
-
-
 
   defp validate_contact_info(changeset) do
     changeset
@@ -127,7 +130,9 @@ defmodule Hamal.Bookings.Reservation do
   defp validate_contact_email(changeset) do
     changeset
     |> validate_required(:contact_email)
-    |> validate_format(:contact_email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
+    |> validate_format(:contact_email, ~r/^[^\s]+@[^\s]+$/,
+      message: "must have the @ sign and no spaces"
+    )
     |> validate_length(:contact_email, max: 50)
   end
 

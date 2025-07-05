@@ -1,40 +1,36 @@
 <h2>Add New Room</h2>
 <div class="flex flex-row gap-4">
-<div class="w-1/2">
-  <.simple_form :let={room} for={@room_changeset} action={~p"/admin/rooms"}>
-    <.input field={room[:number]} label="Room number" field_required={true} placeholder="201" />
-    <.input
-      field={room[:no_of_beds]}
-      type="number"
-      min="1"
-      label="Number of beds"
-      field_required={true}
-    />
-    <.input
-      field={room[:price]}
-      label="Price per night (RSD)"
-      field_required={true}
-      placeholder="3000"
-    />
-    <.input
-      field={room[:status]}
-      type="select"
-      prompt="Choose status"
-      label="Room status"
-      options={room_statuses()}
-    />
-    <.input type="textarea" field={room[:notes]} label="Notes" placeholder="Room notes" />
-    <:actions>
-      <.button>Submit</.button>
-      <.link
-        href={~p"/admin/rooms"}
-      >
-        Cancel
-      </.link>
-    </:actions>
-  </.simple_form>
+  <div class="w-1/2">
+    <.simple_form :let={room} for={@room_changeset} action={~p"/admin/rooms"}>
+      <.input field={room[:number]} label="Room number" field_required={true} placeholder="201" />
+      <.input
+        field={room[:no_of_beds]}
+        type="number"
+        min="1"
+        label="Number of beds"
+        field_required={true}
+      />
+      <.input
+        field={room[:price]}
+        label="Price per night (RSD)"
+        field_required={true}
+        placeholder="3000"
+      />
+      <.input
+        field={room[:status]}
+        type="select"
+        prompt="Choose status"
+        label="Room status"
+        options={room_statuses()}
+      />
+      <.input type="textarea" field={room[:notes]} label="Notes" placeholder="Room notes" />
+      <:actions>
+        <.button>Create</.button>
+        <.link href={~p"/admin/rooms"}>
+          Cancel
+        </.link>
+      </:actions>
+    </.simple_form>
   </div>
-  <div>
-  Context helpers
-  </div>
-  </div>
+  <div></div>
+</div>

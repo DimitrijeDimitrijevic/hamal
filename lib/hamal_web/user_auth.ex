@@ -26,6 +26,7 @@ defmodule HamalWeb.UserAuth do
   if you are not using LiveView.
   """
   def log_in_user(conn, user, params \\ %{}) do
+    user = Accounts.mark_successful_login!(user)
     token = Accounts.generate_user_session_token(user)
     user_return_to = get_session(conn, :user_return_to)
 
@@ -83,7 +84,7 @@ defmodule HamalWeb.UserAuth do
     conn
     |> renew_session()
     |> delete_resp_cookie(@remember_me_cookie)
-    |> redirect(to: ~p"/users/log_in")
+    |> redirect(to: ~p"/users/login")
   end
 
   @doc """
@@ -208,7 +209,7 @@ defmodule HamalWeb.UserAuth do
       conn
       |> put_flash(:error, "You must log in to access this page.")
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
+      |> redirect(to: ~p"/users/login")
       |> halt()
     end
   end

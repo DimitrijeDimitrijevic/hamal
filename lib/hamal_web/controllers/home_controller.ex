@@ -2,6 +2,8 @@ defmodule HamalWeb.HomeController do
   use HamalWeb, :controller
 
   def index(conn, _) do
-    json(conn, %{page: "This page does not have auth! FIX IT!!!"})
+    current_user = conn.assigns.current_user
+    dbg(current_user)
+    render(conn, :index)
   end
 end

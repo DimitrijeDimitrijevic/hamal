@@ -42,15 +42,21 @@ defmodule Hamal.Accounts do
   end
 
   defp search_users_query(query, :name) do
-    (from user in User, where: ilike(user.name, ^"%#{query}%"), select: user)
-  end
-  defp search_users_query(query, :username) do
-    (from user in User, where: ilike(user.username, ^"%#{query}%"), select: user)
-  end
-  defp search_users_query(query, :email) do
-    (from user in User, where: ilike(user.email, ^"%#{query}%"), select: user)
+    from user in User, where: ilike(user.name, ^"%#{query}%"), select: user
   end
 
+  defp search_users_query(query, :username) do
+    from user in User, where: ilike(user.username, ^"%#{query}%"), select: user
+  end
+
+  defp search_users_query(query, :email) do
+    from user in User, where: ilike(user.email, ^"%#{query}%"), select: user
+  end
+
+  def mark_successful_login!(%User{} = user) do
+    now = DateTime.truncate(DateTime.utc_now(), :second)
+    User.successful_login(user, now) |> Repo.update!()
+  end
 
   ## Database getters
 

@@ -1,1 +1,25 @@
 Search must be by name, surname, check_in_date
+
+We will use ecto dynamic queries for this
+https://hexdocs.pm/ecto/dynamic-queries.html
+
+- User can submit nothing in that case we set condition to be always TRUE, since it will return all reservations in such case
+condition = true
+- We use Enum.reduce to select the pattern for search
+
+## Example
+def filter_where(params) do
+  Enum.reduce(params, dynamic(true), fn
+    {"name", value}, dynamic ->
+      dynamic([p], ^dynamic and guest)
+
+    {"surname", value}, dynamic ->
+      dynamic([p], ^dynamic and p.category == ^value)
+
+    {"check_in_date", value}, dynamic ->
+      dynamic([p], ^dynamic and p.published_at > ^value)
+
+    {_, _}, dynamic ->
+      # Not a where parameter
+      dynamic
+  end)

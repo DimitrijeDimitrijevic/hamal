@@ -1,32 +1,38 @@
 <h2>Users</h2>
 
 <div class="mt-4 flex flex-row gap-4 border-t">
-<.add_button route={~p"/admin/users/new"}> Add User </.add_button>
-<div class="ml-8">
-  <.form :let={f} for={%{}} action={~p"/admin/users"} method="get" class="flex flex-row gap-4">
-    <.input field={f[:query]} type="text" placeholder="username@hotelaloha" />
-    <.input
-      field={f[:type]}
-      type="select"
-      prompt="Search by"
-      options={["Name", "Username", "Email"]}
-    />
-    <button>
-      <.icon name="hero-magnifying-glass" /> Search
-    </button>
-     <.link :if={@search} href={~p"/admin/users"} class="inline-flex items-center underline"> Reset search </.link>
-  </.form>
+  <.add_button route={~p"/admin/users/new"}>Add User</.add_button>
+  <div class="ml-8">
+    <.form :let={f} for={%{}} action={~p"/admin/users"} method="get" class="flex flex-row gap-4">
+      <.input field={f[:query]} type="text" placeholder="username@hotelaloha" />
+      <.input
+        field={f[:type]}
+        type="select"
+        prompt="Search by"
+        options={["Name", "Username", "Email"]}
+      />
+      <button>
+        <.icon name="hero-magnifying-glass" /> Search
+      </button>
+      <.link :if={@search} href={~p"/admin/users"} class="inline-flex items-center underline">
+         Reset search 
+      </.link>
+    </.form>
   </div>
 </div>
 
-<.table id="users" rows={@users}>
-  <:col :let={user} label="Id"><%= user.id %></:col>
-  <:col :let={user} label="Name"><%= user.name %></:col>
-  <:col :let={user} label="Surname"><%= user.surname %></:col>
-  <:col :let={user} label="Username"><%= user.username %></:col>
-  <:col :let={user} label="Email"><%= user.email %></:col>
-  <:col :let={user} label="Role"><%= role(user.role) %></:col>
-  <:col :let={user} label="Last login at"><%= user.last_login_at %></:col>
+<.table
+  id="users"
+  rows={@users}
+  row_click={fn user -> JS.navigate(~p"/admin/users/#{user}/edit") end}
+>
+  <:col :let={user} label="Id">{user.id}</:col>
+  <:col :let={user} label="Name">{user.name}</:col>
+  <:col :let={user} label="Surname">{user.surname}</:col>
+  <:col :let={user} label="Username">{user.username}</:col>
+  <:col :let={user} label="Email">{user.email}</:col>
+  <:col :let={user} label="Role">{role(user.role)}</:col>
+  <:col :let={user} label="Last login at">{user.last_login_at}</:col>
   <:action :let={user}>
     <.link
       href={~p"/admin/users/#{user}"}
@@ -37,9 +43,7 @@
     </.link>
   </:action>
   <:action :let={user}>
-    <.link
-      href={~p"/admin/users/#{user}/edit"}
-    >
+    <.link href={~p"/admin/users/#{user}/edit"}>
       Edit
     </.link>
   </:action>

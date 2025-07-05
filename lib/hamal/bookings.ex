@@ -43,6 +43,34 @@ defmodule Hamal.Bookings do
   # end
   #
 
+  def search_reservations(params) do
+    dynamic_query = construct_reservation_query(params)
+
+    Hamal.Bookings.Reservation
+    |> where(^dynamic_query)
+    |> order_by([res], desc: res.check_in)
+    |> preload([res], :rooms)
+    |> Repo.all()
+  end
+
+  defp construct_reservation_query(params) do
+    condition = true
+
+    Enum.reduce(params, condition, fn
+      {"guest_name", value}, condition when value != "" ->
+        dynamic([res], ^condition and res.guest_name == ^value)
+
+      {"guest_surname", value}, condition when value != "" ->
+        dynamic([res], ^condition and res.guest_surname == ^value)
+
+      {"check_in_date", value}, condition when value != "" ->
+        dynamic([res], ^condition and res.check_in == ^value)
+
+      {_, _}, condition ->
+        condition
+    end)
+  end
+
   def reservable_rooms_for_period(check_in, check_out) do
     booked_rooms_ids = booked_rooms_ids(check_in, check_out)
 
@@ -108,7 +136,7 @@ defmodule Hamal.Bookings do
 
   def create_reservation(params, room_ids) do
     result =
-      reservation_multi(params, room_ids)
+      new_reservation_multi(params, room_ids)
       |> Repo.transaction()
 
     case result do
@@ -124,7 +152,7 @@ defmodule Hamal.Bookings do
     end
   end
 
-  defp reservation_multi(reservation_params, rooms_ids) do
+  defp new_reservation_multi(reservation_params, rooms_ids) do
     # First we create reservation, then we check guest and company existance, then we create then if they do not exists
     # Afterwards we update the reservation with company_id and guest_id if they are present or created.
     # This will make life easier in future!
@@ -191,6 +219,16 @@ defmodule Hamal.Bookings do
         :guest_id
       ])
     end)
+  end
+
+  # This will need to handle more cases.
+  # like changing guest, company, other fields will be ok
+  def update_reservation(reservation_id, params, room_ids) do
+    reservation = get_reservation(reservation_id)
+    rooms = get_rooms_by_ids(room_ids) |> Repo.all()
+
+    Reservation.update_changeset(reservation, rooms, params)
+    |> Repo.update()
   end
 
   def search_reservations_by_id(reservation_id) do

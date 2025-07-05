@@ -22,11 +22,11 @@ defmodule HamalWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", HamalWeb do
-    pipe_through [:browser]
+  # scope "/", HamalWeb do
+  #   pipe_through [:browser]
 
-    get "/", HomeController, :index
-  end
+  #   get "/", HomeController, :index
+  # end
 
   # Other scopes may use custom stacks.
   # scope "/api", HamalWeb do
@@ -69,7 +69,7 @@ defmodule HamalWeb.Router do
     end
   end
 
-  ## Authentication routes
+  ## Authentication routes - User routes
 
   scope "/", HamalWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
@@ -82,11 +82,13 @@ defmodule HamalWeb.Router do
       live "/users/reset_password/:token", UserResetPasswordLive, :edit
     end
 
-    post "/users/log_in", UserSessionController, :create
+    post "/users/login", UserSessionController, :create
   end
 
   scope "/", HamalWeb do
     pipe_through [:browser, :require_authenticated_user]
+
+    get "/", HomeController, :index
 
     live_session :require_authenticated_user,
       on_mount: [{HamalWeb.UserAuth, :ensure_authenticated}] do

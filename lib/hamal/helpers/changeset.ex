@@ -18,7 +18,14 @@ defmodule Hamal.Helpers.Changeset do
   end
 
   def trim_string(ch, field) do
-    val = get_field(ch, field, nil) |> String.trim() |> String.downcase()
-    put_change(ch, field, val)
+    val = get_field(ch, field, nil)
+
+    if is_nil(val) do
+      ch
+    else
+      val = val |> String.trim() |> String.downcase()
+
+      put_change(ch, field, val)
+    end
   end
 end

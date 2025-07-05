@@ -1,5 +1,5 @@
 <%= if @action not in [:new, :edit] do %>
-  <.add_button link={~p"/admin/guests/new"} action="Add new guest" />
+  <.add_button route={~p"/admin/guests/new"}>Add new guest</.add_button>
   <div class="flex flex-row">
     <.form :let={f} for={%{}} phx-change="search" class="border-2 border-slate-400 p-4 rounded">
       <label>
@@ -24,10 +24,8 @@
     <:col :let={guest} label="Doc type">{guest.document_type}</:col>
     <:col :let={guest} label="Doc number">{guest.document_number}</:col>
   </.table>
-  <.pagination pagination={@pagination} current_page={@current_page} no_of_pages={@no_of_pages}/>
-
+  <.pagination pagination={@pagination} current_page={@current_page} no_of_pages={@no_of_pages} />
 <% else %>
-  <.live_back_link navigate={~p"/admin/guests"}>Back</.live_back_link>
   <h2>{@title}</h2>
   <p>Please make sure you always provide correct data.</p>
   <p>Fields labeled with red asterix are mandatory fields</p>
@@ -48,7 +46,7 @@
       />
       <datalist id="countries">
         <option :for={country <- @countries}>
-          <%= country %>
+          {country}
         </option>
       </datalist>
       <.input field={@guest[:city]} label="City" field_required={true} placeholder="Istanbul" />

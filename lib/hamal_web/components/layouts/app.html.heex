@@ -1,49 +1,41 @@
-<header>
-  <div class="flex flex-row bg-white p-2 border-b-2 text-base ml-2 sticky top-0 z-40">
-    <ul class="my-1 relative z-10 flex gap-6">
-      <li class="hover:bg-gray-200 rounded-full p-2">
-        Reservations
-      </li>
-      <li class="hover:bg-gray-200 rounded-full p-2">
-        <.link>
-          Guests
-        </.link>
-      </li>
-      <li class="hover:bg-gray-200 rounded-full p-2">
-        <.link>
-          Rooms
-        </.link>
-      </li>
-      <li class="hover:bg-gray-200 rounded-full p-2">
-        Receipts
-      </li>
-    </ul>
-    <ul class="my-1 relative flex z-10 gap-4 px-4 ml-auto">
-      <%= if @current_user do %>
-        <li class="text-sm leading-6 text-zinc-900">
-          <%= @current_user.username %>
-        </li>
-        <li>
-          <.link href={~p"/users/settings"} class="rounded-full border-2 p-2">
-            Settings
-          </.link>
-        </li>
-        <li>
-          <.link
-            href={~p"/users/log_out"}
-            method="delete"
-            class="text-base rounded-full border-2 p-2 text-white bg-red-500 hover:bg-red-400"
-          >
-            Log out
-          </.link>
-        </li>
-      <% end %>
-    </ul>
+<%= if @current_user do %>
+  <div class="flex flex-row gap-4 justify-end mr-10 mt-4 mb-2">
+    <div>
+      <.link href={~p"/users/settings"} class="underline">
+        {@current_user.username}
+      </.link>
+    </div>
+    <div>
+      <.link href={~p"/users/log_out"} method="delete" class="underline">
+        Log out
+      </.link>
+    </div>
   </div>
-</header>
+  <hr />
+  <div class="flex flex-row h-full mt-1">
+    <div class="flex-col border-r-2 min-h-screen w-64">
+      <p class="p-2"><a href={~p"/"}> Menu </a></p>
+      <hr />
+      <ul class="m-2">
+        <li class="mb-2 mt-2 underline">
+          <a href={~p"/reservations"}>
+            Reservations
+          </a>
+        </li>
+        <li class="mb-2 mt-2 underline">
+          <a href={~p"/guests"}>Guests</a>
+        </li>
+        <li class="mb-2 mt-2 underline">
+          <%!-- <a href={~p"/admin/receipts"}>Reciepts</a> --%>
+        </li>
+      </ul>
+    </div>
+  </div>
+  >
+<% end %>
 <main class="px-4 py-20 sm:px-6 lg:px-8">
   <div class="mx-auto max-w-2xl">
     <.flash_group flash={@flash} />
-    <%= @inner_content %>
+    {@inner_content}
   </div>
 </main>

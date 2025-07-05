@@ -19,8 +19,8 @@ defmodule HamalWeb.UserSessionController do
   end
 
   defp create(conn, %{"user" => user_params}, info) do
-    %{"email" => email, "password" => password} = user_params
-    user = Accounts.get_user_by_username_and_password(email, password)
+    %{"email" => username, "password" => password} = user_params
+    user = Accounts.get_user_by_username_and_password(username, password)
 
     if user do
       conn
@@ -30,8 +30,7 @@ defmodule HamalWeb.UserSessionController do
       # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
       conn
       |> put_flash(:error, "Invalid email or password")
-      |> put_flash(:email, String.slice(email, 0, 160))
-      |> redirect(to: ~p"/users/log_in")
+      |> redirect(to: ~p"/users/login")
     end
   end
 

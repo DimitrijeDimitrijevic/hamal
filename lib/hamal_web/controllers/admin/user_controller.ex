@@ -2,9 +2,9 @@ defmodule HamalWeb.Admin.UserController do
   use HamalWeb, :controller
   alias Hamal.Accounts
 
-
   def index(conn, %{"query" => "", "type" => ""}) do
     users = Accounts.get_users()
+
     conn
     |> put_flash(:warning, "Search not valid!")
     |> render(:index, users: users, search: false)

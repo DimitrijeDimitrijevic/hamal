@@ -92,10 +92,9 @@ defmodule Hamal.Accounts.User do
   end
 
   defp validate_password(changeset, opts) do
-    hashed_password = get_field(changeset, :hashed_password, nil)
     password = get_change(changeset, :password)
 
-    if is_nil(hashed_password) and not is_nil(password) do
+    if not is_nil(password) do
       changeset
       |> validate_required([:password])
       |> validate_length(:password, min: 6, max: 72)
@@ -194,16 +193,9 @@ defmodule Hamal.Accounts.User do
     false
   end
 
-  @doc """
-  Validates the current password otherwise adds an error to the changeset.
-  """
-  def validate_current_password(changeset, password) do
-    changeset = cast(changeset, %{current_password: password}, [:current_password])
-
-    if valid_password?(changeset.data, password) do
-      changeset
-    else
-      add_error(changeset, :current_password, "is not valid")
-    end
+  def successful_login(user, timestamp) do
+    user
+    |> cast(%{last_login_at: timestamp}, [:last_login_at])
+    |> validate_required([:last_login_at])
   end
 end

@@ -1,30 +1,26 @@
 <h2>Add New User</h2>
 <div class="flex flex-row gap-4">
-<div class="w-1/2">
-  <.simple_form :let={u} for={@user_changeset} action={~p"/admin/users"}>
-    <.input field={u[:name]} label="Name" field_required={true} />
-    <.input field={u[:surname]} label="Surname" field_required={true} />
-    <.input field={u[:email]} label="Email" type="email" field_required={true} />
-    <.input
-      field={u[:role]}
-      type="select"
-      prompt="Choose role"
-      label="Role"
-      options={[Receptionist: 1, Housekeeping: 2]}
-      field_required={true}
-    />
-    <.input field={u[:password]} label="Password" type="password" field_required={true} />
-    <:actions>
-      <.button>Save</.button>
-      <.link
-        href={~p"/admin/users"}
-      >
-        Cancel
-      </.link>
-    </:actions>
-  </.simple_form>
-</div>
-<div>
-Context helpers
-</div>
+  <div class="w-1/2">
+    <.simple_form :let={u} for={@user_changeset} action={~p"/admin/users"}>
+      <.input field={u[:name]} label="Name" field_required={true} />
+      <.input field={u[:surname]} label="Surname" field_required={true} />
+      <.input field={u[:email]} label="Email" type="email" field_required={true} />
+      <.input
+        field={u[:role]}
+        type="select"
+        prompt="Choose role"
+        label="Role"
+        options={[Receptionist: 1, Housekeeping: 2]}
+        field_required={true}
+      />
+      <.input field={u[:password]} label="Password" type="password" field_required={true} />
+      <:actions>
+        <.button>Save</.button>
+        <.link href={~p"/admin/users"}>
+          Cancel
+        </.link>
+      </:actions>
+    </.simple_form>
+  </div>
+  <div></div>
 </div>
