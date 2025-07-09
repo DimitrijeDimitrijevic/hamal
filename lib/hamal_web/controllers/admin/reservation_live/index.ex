@@ -10,6 +10,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
     socket =
       socket
+      |> assign(guest_search: false)
       |> assign(room_selection_status: nil)
       |> assign(reservation_channels: reservation_channels)
 
@@ -146,10 +147,31 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   end
 
   @impl true
+  def handle_event("guest-search", params, socket) do
+    guest_search = socket.assigns.guest_search
+    guest_search = if guest_search, do: false, else: true
+    {:noreply, assign(socket, guest_search: guest_search)}
+  end
+
+  @impl true
   def handle_event("start-check-in", %{"value" => reservation_id}, socket) do
     reservation = String.to_integer(reservation_id) |> Bookings.get_reservation()
 
     {:norepley, socket}
+  end
+
+  @impl true
+  def handle_event("guest-selection", %{"guest_id" => guest_id}, socket) do
+    guest = Hamal.Clients.get_guest(guest_id)
+    # This should be done in backend / Context not here
+    # TODO: PUT ALL THE GUEST FIELDS
+    reservation =
+      socket.assigns.reservation.source
+      |> Ecto.Changeset.put_change(:guest_name, guest.name)
+      |> to_form(action: :validate)
+
+    socket = assign(socket, reservation: reservation)
+    {:noreply, socket}
   end
 
   ############# Reservations search ####################################
@@ -354,6 +376,9 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     <h2>New reservation</h2>
     <div class="flex flex-row gap-4 mb-4">
       <div class="w-1/2">
+        <button class="mt-4 mb-2" phx-click="guest-search">
+          <.icon name="hero-user-plus" />Select guest
+        </button>
         <.simple_form for={@reservation} phx-change="validate" phx-submit="create">
           <.input field={@reservation[:guest_name]} type="text" label="Name" field_required={true} />
           <.input
@@ -438,6 +463,14 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
             </.link>
           </:actions>
         </.simple_form>
+      </div>
+      <div class="mr-2 ml-2">
+        <%= if @guest_search do %>
+          <.live_component
+            module={HamalWeb.Admin.ReservationLive.GuestSearchLiveComponent}
+            id="guest-search"
+          />
+        <% end %>
       </div>
     </div>
     """

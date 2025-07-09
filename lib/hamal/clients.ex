@@ -85,6 +85,31 @@ defmodule Hamal.Clients do
     |> Repo.one()
   end
 
+  def search_guests(guest_query, guest_search_by) do
+    guest_query = guest_query |> String.trim() |> String.downcase()
+    guest_query = "%#{guest_query}%"
+
+    guest_search_query(guest_query, guest_search_by)
+    |> Repo.all()
+  end
+
+  defp guest_search_query(guest_query, "name_surname") do
+    from(g in Guest,
+      where:
+        ilike(fragment("lower(?)", g.name), ^guest_query) or
+          ilike(fragment("lower(?)", g.surname), ^guest_query),
+      select: g
+    )
+  end
+
+  defp guest_search_query(guest_query, "phone") do
+    from(g in Guest, where: ilike(fragment("lower(?)", g.phone), ^guest_query), select: g)
+  end
+
+  defp guest_search_query(guest_query, "email") do
+    from(g in Guest, where: ilike(fragment("lower(?)", g.email), ^guest_query), select: g)
+  end
+
   def get_company_by_vat(company_vat) do
     from(c in Company, where: c.vat == ^company_vat, select: c.id)
     |> Repo.one()
