@@ -10,6 +10,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
     socket =
       socket
+      |> assign(guest: nil)
       |> assign(guest_search: false)
       |> assign(room_selection_status: nil)
       |> assign(reservation_channels: reservation_channels)
@@ -43,6 +44,8 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   """
   @impl true
   def handle_event("create", %{"reservation" => params}, socket) do
+    guest = socket.assigns.guest
+
     {status, selected_rooms_ids} = handle_rooms_selection(params["room_ids"])
 
     if status == :error do
@@ -54,7 +57,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
       {:noreply, socket}
     else
       socket =
-        case Bookings.create_reservation(params, selected_rooms_ids) do
+        case Bookings.create_reservation(params, selected_rooms_ids, guest) do
           {:ok, _reservation} ->
             socket
             |> put_flash(:info, "Reservation created!")
@@ -147,7 +150,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   end
 
   @impl true
-  def handle_event("guest-search", params, socket) do
+  def handle_event("guest-search", _params, socket) do
     guest_search = socket.assigns.guest_search
     guest_search = if guest_search, do: false, else: true
     {:noreply, assign(socket, guest_search: guest_search)}
@@ -163,14 +166,15 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   @impl true
   def handle_event("guest-selection", %{"guest_id" => guest_id}, socket) do
     guest = Hamal.Clients.get_guest(guest_id)
-    # This should be done in backend / Context not here
-    # TODO: PUT ALL THE GUEST FIELDS
-    reservation =
-      socket.assigns.reservation.source
-      |> Ecto.Changeset.put_change(:guest_name, guest.name)
-      |> to_form(action: :validate)
 
-    socket = assign(socket, reservation: reservation)
+    reservation =
+      socket.assigns.reservation.source |> assign_guest_to_current_reservation_form(guest)
+
+    socket =
+      socket
+      |> assign(reservation: reservation)
+      |> assign(guest: guest)
+
     {:noreply, socket}
   end
 
@@ -283,6 +287,11 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   defp validate_reservation_form(reservation_params) do
     %Reservation{}
     |> Reservation.validate_changeset(reservation_params)
+    |> to_form(action: :validate)
+  end
+
+  defp assign_guest_to_current_reservation_form(reservation_changeset, guest) do
+    Bookings.Reservation.add_guest_to_current_reservation(reservation_changeset, guest)
     |> to_form(action: :validate)
   end
 

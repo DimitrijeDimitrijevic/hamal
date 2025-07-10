@@ -95,6 +95,21 @@ defmodule Hamal.Bookings.Reservation do
     |> cast(params, @permitted)
   end
 
+  def add_guest_to_current_reservation(reservation_changeset, %Hamal.Clients.Guest{
+        id: id,
+        name: name,
+        surname: surname,
+        phone: phone,
+        email: email
+      }) do
+    reservation_changeset
+    |> put_change(:guest_name, name)
+    |> put_change(:guest_surname, surname)
+    |> put_change(:contact_number, phone)
+    |> put_change(:contact_email, email)
+    |> put_change(:guest_id, id)
+  end
+
   defp handle_check_in_check_out_dates(cs_map, today \\ Date.utc_today())
 
   defp handle_check_in_check_out_dates(cs, today) do

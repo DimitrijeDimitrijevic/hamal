@@ -134,9 +134,9 @@ defmodule Hamal.Bookings do
     |> Repo.preload(:rooms)
   end
 
-  def create_reservation(params, room_ids) do
+  def create_reservation(params, room_ids, guest) do
     result =
-      new_reservation_multi(params, room_ids)
+      new_reservation_multi(params, room_ids, guest)
       |> Repo.transaction()
 
     case result do
@@ -152,7 +152,7 @@ defmodule Hamal.Bookings do
     end
   end
 
-  defp new_reservation_multi(reservation_params, rooms_ids) do
+  defp new_reservation_multi(reservation_params, rooms_ids, guest) do
     # First we create reservation, then we check guest and company existance, then we create then if they do not exists
     # Afterwards we update the reservation with company_id and guest_id if they are present or created.
     # This will make life easier in future!
@@ -162,14 +162,6 @@ defmodule Hamal.Bookings do
       Reservation.create_changeset(%Reservation{}, rooms, reservation_params)
     end)
     |> Ecto.Multi.run(:guest, fn _repo, %{new_reservation: reservation} ->
-      guest =
-        Clients.get_guest(
-          reservation.guest_name,
-          reservation.guest_surname,
-          reservation.contact_number,
-          reservation.contact_email
-        )
-
       if is_nil(guest) do
         guest_params = %{
           name: reservation.guest_name,
@@ -207,17 +199,14 @@ defmodule Hamal.Bookings do
                                             guest: guest,
                                             new_reservation: reservation
                                           } ->
-      update_params =
-        if is_nil(company) do
-          %{guest_id: guest.id}
-        else
-          %{company_id: company.id, guest_id: guest.id}
-        end
+      reservation
+      |> Ecto.Changeset.put_assoc(:company, company)
+      |> Ecto.Changeset.put_assoc(:guest, guest)
 
-      Ecto.Changeset.cast(reservation, update_params, [
-        :company_id,
-        :guest_id
-      ])
+      # Ecto.Changeset.put_ass(reservation, update_params, [
+      #   :company_id,
+      #   :guest_id
+      # ])
     end)
   end
 
