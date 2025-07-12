@@ -110,6 +110,11 @@ defmodule Hamal.Bookings.Reservation do
     |> put_change(:guest_id, id)
   end
 
+  def assoc_guest_and_company(reservation, guest_id, company_id) do
+    reservation
+    |> change(%{guest_id: guest_id, company_id: company_id})
+  end
+
   defp handle_check_in_check_out_dates(cs_map, today \\ Date.utc_today())
 
   defp handle_check_in_check_out_dates(cs, today) do

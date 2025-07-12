@@ -199,14 +199,8 @@ defmodule Hamal.Bookings do
                                             guest: guest,
                                             new_reservation: reservation
                                           } ->
-      reservation
-      |> Ecto.Changeset.put_assoc(:company, company)
-      |> Ecto.Changeset.put_assoc(:guest, guest)
-
-      # Ecto.Changeset.put_ass(reservation, update_params, [
-      #   :company_id,
-      #   :guest_id
-      # ])
+      company_id = if not is_nil(company), do: company.id
+      Reservation.assoc_guest_and_company(reservation, guest.id, company_id)
     end)
   end
 
