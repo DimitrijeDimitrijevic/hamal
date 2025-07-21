@@ -69,5 +69,6 @@ defmodule Hamal.Clients.Guest do
   def check_in_changeset(guest, params \\ %{}) do
     guest
     |> cast(params, @fields)
+    |> validate_required([:phone, :email, :name, :surname, :document_type, :document_number])
   end
 end

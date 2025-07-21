@@ -56,7 +56,7 @@ defmodule Hamal.Bookings.Reservation do
     belongs_to :company, Hamal.Clients.Company
     belongs_to :guest, Hamal.Clients.Guest
 
-    has_many :stay, Hamal.Bookings.Stay
+    has_many :stays, Hamal.Bookings.Stay
 
     # Relationship to rooms, trough join table on database level
     many_to_many :rooms, Hamal.Bookings.Room,

@@ -234,21 +234,50 @@ defmodule Hamal.Bookings do
   end
 
   def check_in_guest(reservation, room, %Guest{} = guest) do
-    Ecto.build_assoc(reservation, :stay)
-    |> Stay.add_room_and_guest(room, guest)
-    |> Hamal.Repo.insert()
+    result =
+      Ecto.build_assoc(reservation, :stays)
+      |> Stay.add_room_and_guest(room, guest)
+      |> Hamal.Repo.insert()
+
+    case result do
+      {:ok, stay} ->
+        {:ok, stay, guest}
+
+      {:error, changeset} ->
+        {:error, guest}
+    end
   end
 
-  # def check_in_guest(reservation, room, guest) when is_map(guest) do
-  #   Ecto.build_assoc(reservation, :stay)
-  #   |> assign_room_and_guest(room, guest)
-  #   |> Repo.insert()
-  # end
+  def check_in_guest(reservation, room, guest) when is_map(guest) do
+    guest_changeset = Guest.check_in_changeset(%Guest{}, guest)
 
-  def assign_room_and_guest(%Stay{}, room, guest) do
+    case Repo.insert(guest_changeset) do
+      {:ok, guest} ->
+        stay_result =
+          Ecto.build_assoc(reservation, :stays)
+          |> Stay.add_room_and_guest(room, guest)
+          |> Repo.insert()
+
+        case stay_result do
+          {:ok, stay} ->
+            {:ok, stay, guest}
+
+          _ ->
+            {:error, nil}
+        end
+
+      {:error, guest_changeset} = result ->
+        result
+    end
   end
 
   def get_stay_by_id(stay_id) do
     Repo.get_by(Stay, id: stay_id)
+  end
+
+  def current_guests_in_room_count(room_id, reservation) do
+    reservation = Repo.preload(reservation, :stays)
+
+    Enum.count(reservation.stays, fn stay -> stay.room_id == room_id end)
   end
 end
