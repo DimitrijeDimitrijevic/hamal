@@ -17,6 +17,7 @@ defmodule Hamal.Repo.Migrations.AddReservationsTable do
       add :breakfast, :boolean
       add :company_name, :string
       add :company_vat, :string
+      add :checked_in, :boolean
 
       timestamps(type: :utc_datetime)
     end

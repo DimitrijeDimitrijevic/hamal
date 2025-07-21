@@ -66,6 +66,8 @@ defmodule HamalWeb.Router do
       live "/reservations", ReservationLive.Index, :index
       live "/reservations/new", ReservationLive.Index, :new
       live "/reservations/:id/edit", ReservationLive.Index, :edit
+      live "/stays", StaysLive.Index, :index
+      live "/check_in/:reservation_id", CheckInLive
     end
   end
 

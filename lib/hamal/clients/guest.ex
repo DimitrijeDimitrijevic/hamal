@@ -45,6 +45,7 @@ defmodule Hamal.Clients.Guest do
     field :birth_date, :date
     belongs_to :company, Hamal.Clients.Company
     has_many :reservations, Hamal.Bookings.Reservation
+    has_many :stay, Hamal.Bookings.Stay
 
     timestamps(type: :utc_datetime)
   end
@@ -63,5 +64,10 @@ defmodule Hamal.Clients.Guest do
     |> cast(params, [:name, :surname, :phone, :email])
     |> Changeset.normalize_name(:name)
     |> Changeset.normalize_name(:surname)
+  end
+
+  def check_in_changeset(guest, params \\ %{}) do
+    guest
+    |> cast(params, @fields)
   end
 end

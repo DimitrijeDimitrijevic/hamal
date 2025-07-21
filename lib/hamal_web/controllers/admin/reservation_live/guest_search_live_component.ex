@@ -9,7 +9,8 @@ defmodule HamalWeb.Admin.ReservationLive.GuestSearchLiveComponent do
   end
 
   @impl true
-  def update(_assigns, socket) do
+  def update(assigns, socket) do
+    socket = assign(socket, selection: assigns.selection)
     {:ok, socket}
   end
 
@@ -30,7 +31,7 @@ defmodule HamalWeb.Admin.ReservationLive.GuestSearchLiveComponent do
     ~H"""
     <div>
       <h2>Guest selection</h2>
-      <p>Add guest who is creating reservation.</p>
+      <p>{@selection}</p>
       <div class="ml-2 mr-2">
         <.form for={%{}} phx-change="guest-search" phx-target={@myself} class="flex flex-row gap-2">
           <.input type="text" name="guest-query" value="" />

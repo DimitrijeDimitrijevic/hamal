@@ -50,9 +50,13 @@ defmodule Hamal.Bookings.Reservation do
     # can be a free form or calculated from check_in and check_out
     # but should be present in database
     field :no_of_nights, :integer
+    # We mark this field if the reservation is fully checked in
+    field :checked_in, :boolean
 
     belongs_to :company, Hamal.Clients.Company
     belongs_to :guest, Hamal.Clients.Guest
+
+    has_many :stay, Hamal.Bookings.Stay
 
     # Relationship to rooms, trough join table on database level
     many_to_many :rooms, Hamal.Bookings.Room,

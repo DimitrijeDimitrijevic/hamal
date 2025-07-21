@@ -1,7 +1,7 @@
 defmodule Hamal.Bookings do
   import Ecto.Query
   alias Hamal.Repo
-  alias Hamal.Bookings.{Reservation, Room}
+  alias Hamal.Bookings.{Reservation, Room, Stay}
   alias Hamal.Clients.{Guest, Company}
   alias Hamal.Clients
 
@@ -199,8 +199,8 @@ defmodule Hamal.Bookings do
                                             guest: guest,
                                             new_reservation: reservation
                                           } ->
-      company_id = if not is_nil(company), do: company.id
-      Reservation.assoc_guest_and_company(reservation, guest.id, company_id)
+      reservation
+      |> Ecto.Changeset.change(%{guest_id: guest.id, company_id: company && company.id})
     end)
   end
 
@@ -225,5 +225,30 @@ defmodule Hamal.Bookings do
 
   def get_rooms_by_ids(room_ids) do
     from(r in Room, where: r.id in ^room_ids, select: r)
+  end
+
+  ### Stays
+  def new_stay(params \\ %{}) do
+    %Stay{}
+    |> Stay.changeset(params)
+  end
+
+  def check_in_guest(reservation, room, %Guest{} = guest) do
+    Ecto.build_assoc(reservation, :stay)
+    |> Stay.add_room_and_guest(room, guest)
+    |> Hamal.Repo.insert()
+  end
+
+  # def check_in_guest(reservation, room, guest) when is_map(guest) do
+  #   Ecto.build_assoc(reservation, :stay)
+  #   |> assign_room_and_guest(room, guest)
+  #   |> Repo.insert()
+  # end
+
+  def assign_room_and_guest(%Stay{}, room, guest) do
+  end
+
+  def get_stay_by_id(stay_id) do
+    Repo.get_by(Stay, id: stay_id)
   end
 end

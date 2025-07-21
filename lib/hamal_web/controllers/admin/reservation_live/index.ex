@@ -39,9 +39,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     {:noreply, socket}
   end
 
-  @doc """
-  Handling creating reservations in LiveView process.
-  """
+  # Handling creating reservations in LiveView process.
   @impl true
   def handle_event("create", %{"reservation" => params}, socket) do
     guest = socket.assigns.guest
@@ -117,6 +115,8 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     end
   end
 
+  # Function for handling changing check-in-date.
+  # Each time date changes availabe rooms are updated in the UI, according to new values of check-in-date & check-out-date
   @impl true
   def handle_event("check-in-date", %{"reservation" => %{"check_in" => check_in_date}}, socket) do
     check_in_date = Date.from_iso8601!(check_in_date)
@@ -149,6 +149,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     {:noreply, socket}
   end
 
+  # Triggers component to show guest search bar when new reservations is created.
   @impl true
   def handle_event("guest-search", _params, socket) do
     guest_search = socket.assigns.guest_search
@@ -160,7 +161,14 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   def handle_event("start-check-in", %{"value" => reservation_id}, socket) do
     reservation = String.to_integer(reservation_id) |> Bookings.get_reservation()
 
-    {:norepley, socket}
+    socket =
+      if is_nil(reservation) do
+        put_flash(socket, :warning, "Reservation not valid!")
+      else
+        push_navigate(socket, to: ~p"/admin/check_in/#{reservation}")
+      end
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -335,6 +343,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   end
 
   ##### RENDER FUNCTIONS #####
+  # Renders all reservations page with search
   @impl true
   def render(%{action: :index} = assigns) do
     ~H"""
@@ -478,6 +487,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
           <.live_component
             module={HamalWeb.Admin.ReservationLive.GuestSearchLiveComponent}
             id="guest-search"
+            selection="Reservation guest"
           />
         <% end %>
       </div>

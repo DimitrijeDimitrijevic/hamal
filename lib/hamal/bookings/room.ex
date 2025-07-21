@@ -14,6 +14,7 @@ defmodule Hamal.Bookings.Room do
     field :notes, :string
     field :status, :integer, default: 0
     many_to_many :reservations, Hamal.Bookings.Reservation, join_through: "reservations_rooms"
+    has_many :stay, Hamal.Bookings.Stay
 
     timestamps(type: :utc_datetime)
   end
