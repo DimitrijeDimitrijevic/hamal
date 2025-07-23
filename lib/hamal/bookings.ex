@@ -284,8 +284,6 @@ defmodule Hamal.Bookings do
     Enum.count(reservation.stays, fn stay -> stay.room_id == room_id end)
   end
 
-  # TO-Do here also we need to get all
-  # stays which are not checked_out, where is_nil(checked_out)
   def all_stays(date) do
     from(s in Stay,
       where: type(s.checked_in, :date) == ^date and is_nil(s.checked_out),
