@@ -141,6 +141,9 @@ defmodule Hamal.Bookings do
 
     case result do
       {:ok, %{reservation: reservation}} ->
+        reservation = Repo.preload(reservation, :rooms)
+        confirmation_email = Hamal.Emails.Bookings.confirmation_email(reservation)
+        Hamal.Mailer.deliver(confirmation_email)
         {:ok, reservation}
 
       {:error, operation, changeset, _changes} ->
@@ -266,7 +269,7 @@ defmodule Hamal.Bookings do
             {:error, nil}
         end
 
-      {:error, guest_changeset} = result ->
+      {:error, _guest_changeset} = result ->
         result
     end
   end
@@ -279,5 +282,21 @@ defmodule Hamal.Bookings do
     reservation = Repo.preload(reservation, :stays)
 
     Enum.count(reservation.stays, fn stay -> stay.room_id == room_id end)
+  end
+
+  # TO-Do here also we need to get all
+  # stays which are not checked_out, where is_nil(checked_out)
+  def all_stays(date) do
+    from(s in Stay,
+      where: type(s.checked_in, :date) == ^date and is_nil(s.checked_out),
+      select: s
+    )
+    |> Repo.all()
+    |> Repo.preload([:reservation, :room, :guest])
+  end
+
+  def all_stays() do
+    Repo.all(Stay)
+    |> Repo.preload([:reservation, :room, :guest])
   end
 end

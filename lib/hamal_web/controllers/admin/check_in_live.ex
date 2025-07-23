@@ -18,14 +18,11 @@ defmodule HamalWeb.Admin.CheckInLive do
     {:ok, socket}
   end
 
-  # we actions here not in handle params
-  # extract here only what we need for processing later
   @impl true
   def handle_params(%{"reservation_id" => reservation_id}, _uri, socket) do
     reservation = Bookings.get_reservation(reservation_id)
     rooms = Enum.map(reservation.rooms, fn room -> {room.number, room.id} end)
-    no_of_rooms = Enum.count(reservation.rooms)
-    multi_select = if no_of_rooms > 1, do: true, else: false
+    multi_select = if Enum.count(reservation.rooms) > 1, do: true, else: false
 
     guest = new_guest()
 
@@ -34,18 +31,17 @@ defmodule HamalWeb.Admin.CheckInLive do
       |> assign(reservation: reservation)
       |> assign(rooms: rooms)
       |> assign(multi_select: multi_select)
-      |> assign(no_of_rooms: no_of_rooms)
       |> assign(guest: guest)
 
     {:noreply, socket}
   end
 
-  @impl true
-  def handle_event("clear-form", _unsigned_params, socket) do
-    reservation = socket.assigns.reservation
-    socket = push_patch(socket, to: ~p"/admin/check_in/#{reservation}")
-    {:noreply, socket}
-  end
+  # @impl true
+  # def handle_event("clear-form", _unsigned_params, socket) do
+  #   reservation = socket.assigns.reservation
+  #   socket = push_patch(socket, to: ~p"/admin/check_in/#{reservation}")
+  #   {:noreply, socket}
+  # end
 
   @impl true
   def handle_event("guest-search", _unsigned_params, socket) do
@@ -76,7 +72,7 @@ defmodule HamalWeb.Admin.CheckInLive do
 
     socket =
       case Bookings.check_in_guest(reservation, room, guest) do
-        {:ok, stay} ->
+        {:ok, stay, guest} ->
           socket
           |> put_flash(
             :info,

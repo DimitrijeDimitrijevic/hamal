@@ -56,9 +56,9 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     else
       socket =
         case Bookings.create_reservation(params, selected_rooms_ids, guest) do
-          {:ok, _reservation} ->
+          {:ok, reservation} ->
             socket
-            |> put_flash(:info, "Reservation created!")
+            |> put_flash(:info, "Reservation created and confirmation sent!")
             |> push_patch(to: ~p"/admin/reservations")
 
           {:error, :other_failure} ->
