@@ -286,7 +286,7 @@ defmodule Hamal.Bookings do
 
   def all_stays(date) do
     from(s in Stay,
-      where: type(s.checked_in, :date) == ^date and is_nil(s.checked_out),
+      where: type(s.checked_in, :date) <= ^date and is_nil(s.checked_out),
       select: s
     )
     |> Repo.all()
@@ -296,5 +296,11 @@ defmodule Hamal.Bookings do
   def all_stays() do
     Repo.all(Stay)
     |> Repo.preload([:reservation, :room, :guest])
+  end
+
+  def check_out_stay(stay) do
+    stay
+    |> Stay.check_out_changeset()
+    |> Repo.update()
   end
 end

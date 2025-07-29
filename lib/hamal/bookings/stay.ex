@@ -28,4 +28,9 @@ defmodule Hamal.Bookings.Stay do
     |> put_assoc(:guest, guest)
     |> put_change(:checked_in, DateTime.truncate(DateTime.utc_now(), :second))
   end
+
+  def check_out_changeset(stay) do
+    cast(stay, %{}, @permitted)
+    |> put_change(:checked_out, DateTime.truncate(DateTime.utc_now(), :second))
+  end
 end

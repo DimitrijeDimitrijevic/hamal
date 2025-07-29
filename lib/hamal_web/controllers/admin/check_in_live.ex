@@ -36,13 +36,6 @@ defmodule HamalWeb.Admin.CheckInLive do
     {:noreply, socket}
   end
 
-  # @impl true
-  # def handle_event("clear-form", _unsigned_params, socket) do
-  #   reservation = socket.assigns.reservation
-  #   socket = push_patch(socket, to: ~p"/admin/check_in/#{reservation}")
-  #   {:noreply, socket}
-  # end
-
   @impl true
   def handle_event("guest-search", _unsigned_params, socket) do
     guest_search = if socket.assigns.guest_search, do: false, else: true
@@ -62,13 +55,14 @@ defmodule HamalWeb.Admin.CheckInLive do
     {:noreply, socket}
   end
 
+  # Used for rooms which one bed, current logic, actually should go from room settings
   @impl true
   def handle_event("single-check-in", params, socket) do
     guest =
       if not is_nil(socket.assigns.guest_id), do: socket.assigns.guest.data, else: params["guest"]
 
     reservation = socket.assigns.reservation
-    room = reservation.rooms |> List.first()
+    [room] = reservation.rooms
 
     socket =
       case Bookings.check_in_guest(reservation, room, guest) do

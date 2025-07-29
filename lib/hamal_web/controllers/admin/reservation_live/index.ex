@@ -20,7 +20,9 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
+    IO.puts("PATCH")
     live_action = socket.assigns.live_action
+    dbg(live_action)
     socket = apply_live_action(params, live_action, socket)
     {:noreply, socket}
   end
@@ -279,6 +281,10 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     |> assign(reservation_channels: Constants.reservation_channel_types())
   end
 
+  defp apply_live_action(%{"id" => reservation_id}, :show, socket) do
+    assign(socket, action: :show)
+  end
+
   defp apply_live_action(_params, action, socket) do
     socket
     |> assign(action: action)
@@ -371,7 +377,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     <.table
       id="reservations"
       rows={@reservations}
-      row_click={fn reservation -> JS.patch(~p"/admin/reservations/#{reservation}/edit") end}
+      row_click={fn reservation -> JS.patch(~p"/admin/reservations/#{reservation}/show") end}
     >
       <:col :let={reservation} label="ID">{reservation.id}</:col>
       <:col :let={reservation} label="Check In">{date(reservation.check_in)}</:col>
@@ -383,7 +389,8 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
       <:col :let={reservation} label="Channel">{reservation.channel}</:col>
       <:col :let={reservation} label="Rooms">{reserved_rooms(reservation.rooms)}</:col>
       <:action :let={reservation}>
-        <button value={reservation.id} phx-click="start-check-in">Check in</button>
+        <.link patch={~p"/admin/reservations/#{reservation}/edit"}> Edit </.link>
+        <button class="ml-4" value={reservation.id} phx-click="start-check-in">Check in</button>
       </:action>
     </.table>
     """
@@ -395,7 +402,12 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     <div class="flex flex-row gap-4 mb-4">
       <div class="w-1/2">
         <button class="mt-4 mb-2" phx-click="guest-search">
-          <.icon name="hero-user-plus" />Select guest
+          <.icon name="hero-user-plus" />
+          <%= if @guest_search do %>
+            Close guest selection
+          <% else %>
+            Select guest
+          <% end %>
         </button>
         <.simple_form for={@reservation} phx-change="validate" phx-submit="create">
           <.input field={@reservation[:guest_name]} type="text" label="Name" field_required={true} />
@@ -602,6 +614,15 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
         </.simple_form>
       </div>
     </div>
+    """
+  end
+
+  @impl true
+  def render(%{action: :show} = assigns) do
+    ~H"""
+    <.modal id="reservation-details" show={true} on_cancel={JS.patch(~p"/admin/reservations")}>
+      xxxxxx
+    </.modal>
     """
   end
 end
