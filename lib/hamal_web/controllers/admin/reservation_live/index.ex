@@ -20,8 +20,8 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
-    IO.puts("PATCH")
     live_action = socket.assigns.live_action
+    dbg(params)
     dbg(live_action)
     socket = apply_live_action(params, live_action, socket)
     {:noreply, socket}
@@ -282,7 +282,13 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   end
 
   defp apply_live_action(%{"id" => reservation_id}, :show, socket) do
-    assign(socket, action: :show)
+    reservation = Bookings.get_reservation(reservation_id)
+    rooms = reservation.rooms |> Hamal.Repo.preload(:stays)
+
+    socket
+    |> assign(rooms: rooms)
+    |> assign(reservation: reservation)
+    |> assign(action: :show)
   end
 
   defp apply_live_action(_params, action, socket) do
@@ -621,7 +627,59 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   def render(%{action: :show} = assigns) do
     ~H"""
     <.modal id="reservation-details" show={true} on_cancel={JS.patch(~p"/admin/reservations")}>
-      xxxxxx
+      <h2>Reservation {@reservation.id} details</h2>
+      <hr />
+      <div class="grid grid-cols-2">
+        <div>
+          <p class="underline mt-4">
+            <.link href={~p"/admin/guests/#{@reservation.guest_id}"}>
+              {@reservation.guest_name} {@reservation.guest_surname}
+            </.link>
+          </p>
+          <ul>
+            <li>
+              Phone:
+              <a class="underline" href={"tel:#{@reservation.contact_number}"}>
+                {@reservation.contact_number}
+              </a>
+            </li>
+            <li>
+              Email:
+              <a class="underline" href={"mailto:#{@reservation.contact_email}"}>
+                {@reservation.contact_email}
+              </a>
+            </li>
+            <li>
+              Period: <span>{date(@reservation.check_in)} - {date(@reservation.check_out)}</span>
+            </li>
+            <li>Number of nights: <span>{@reservation.no_of_nights}</span></li>
+            <li>Channel: <span>{@reservation.channel}</span></li>
+            <li>Breakfast: <span>{yes_or_no(@reservation.breakfast)}</span></li>
+            <li :if={@reservation.company_id}>
+              Company:
+              <.link href={~p"/admin/companies/#{@reservation.company_id}/show"}>
+                <span>{@reservation.company_name}</span>
+              </.link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <p>Rooms</p>
+          <%= for room <- @rooms do %>
+            <div class=" border-gray-300 border-2 rounded p-1 mt-1">
+              <span class="hover:border-gray-500 hover:cursor-pointer text-lg border-2 rounded">
+                {room.number}
+              </span>
+              <span class="ml-2"> Number of guests </span>
+              <ul :if={room.stays != []}>
+                <li>Guest name surname</li>
+              </ul>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <p :if={@reservation.notes}>Notes: {@reservation.notes}</p>
     </.modal>
     """
   end

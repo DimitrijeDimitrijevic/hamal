@@ -128,6 +128,7 @@ defmodule HamalWeb.Admin.CheckInLive do
           socket
           |> assign(guest: new_guest())
           |> assign(guest_search: false)
+          |> assign(start_check_in: false)
           |> put_flash(
             :info,
             "Guest #{guest.name} #{guest.surname} checked in room ##{room.number} with stay ID #{stay.id}!"
