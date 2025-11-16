@@ -101,7 +101,7 @@ defmodule Hamal.Bookings do
   """
   def get_reserved_rooms_for_period(check_in, check_out) do
     from(reservation in Hamal.Bookings.Reservation,
-      where: reservation.check_in == ^check_in and reservation.check_out == ^check_out,
+      where: reservation.check_in <= ^check_in and reservation.check_out >= ^check_out,
       select: reservation,
       preload: [:rooms]
     )
@@ -303,4 +303,7 @@ defmodule Hamal.Bookings do
     |> Stay.check_out_changeset()
     |> Repo.update()
   end
+
+  ## GEt only relevant stays for a room and for reservation
+  ## stay.room_id in room_ids as list and stay_id.reservation_id == reservation.id
 end
