@@ -9,7 +9,6 @@ defmodule Hamal.Bookings.Reservation do
   @permitted [
     :check_in,
     :check_out,
-    :guaranteed,
     :guest_name,
     :guest_surname,
     :company_name,
@@ -29,7 +28,6 @@ defmodule Hamal.Bookings.Reservation do
   schema "reservations" do
     field :check_in, :date
     field :check_out, :date
-    field :guaranteed, :boolean, default: false
     field :guest_name, :string
     field :guest_surname, :string
     field :contact_number, :string
@@ -52,6 +50,14 @@ defmodule Hamal.Bookings.Reservation do
     field :no_of_nights, :integer
     # We mark this field if the reservation is fully checked in
     field :checked_in, :boolean
+
+    # Status field as string, confirmed, canceled
+    field :status, :string
+    # Track when the users has changed reservation status
+    field :status_changed_at, :utc_datetime
+    # If the user is actually changing status to confirmed, confirmation should be provided
+    # that can be the invoice number or something else which is relevant for business.
+    field :confirmation_number, :string
 
     belongs_to :company, Hamal.Clients.Company
     belongs_to :guest, Hamal.Clients.Guest

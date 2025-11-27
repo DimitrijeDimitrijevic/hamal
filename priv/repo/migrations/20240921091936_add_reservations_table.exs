@@ -5,7 +5,6 @@ defmodule Hamal.Repo.Migrations.AddReservationsTable do
     create table("reservations") do
       add :check_in, :date, null: false
       add :check_out, :date, null: false
-      add :guaranteed, :boolean
       add :guest_name, :string
       add :guest_surname, :string
       add :contact_number, :string
@@ -18,6 +17,9 @@ defmodule Hamal.Repo.Migrations.AddReservationsTable do
       add :company_name, :string
       add :company_vat, :string
       add :checked_in, :boolean
+      add :status, :string
+      add :status_changed_at, :utc_datetime
+      add :confirmation_number, :string
 
       timestamps(type: :utc_datetime)
     end
@@ -26,5 +28,6 @@ defmodule Hamal.Repo.Migrations.AddReservationsTable do
     create index(:reservations, [:check_in])
     create index(:reservations, [:check_out])
     create index(:reservations, [:check_in, :check_out])
+    create index(:reservations, [:status])
   end
 end

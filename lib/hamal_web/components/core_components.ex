@@ -19,22 +19,28 @@ defmodule HamalWeb.CoreComponents do
   alias Phoenix.LiveView.JS
   import HamalWeb.Gettext
 
-
   attr :rooms, :list, default: []
+
   def rooms_selection(assigns) do
     ~H"""
     <div class="grid grid-cols-4 gap-4">
-    <%= for room <- @rooms do %>
-      <div>
-      <label class="block text-sm font-semibold leading-6 text-zinc-800"> {room.label}
-        <input type="checkbox" class="rounded-md" name="reservation[room_ids][]" value={room.id} %>
-      </label>
-      </div>
-    <% end %>
+      <%= for room <- @rooms do %>
+        <div>
+          <label class="block text-sm font-semibold leading-6 text-zinc-800">
+            {room.label}
+            <input
+              type="checkbox"
+              class="rounded-md"
+              name="reservation[room_ids][]"
+              value={room.id}
+              %
+            />
+          </label>
+        </div>
+      <% end %>
     </div>
-  """
+    """
   end
-
 
   @doc """
     Custom pagination component, logic for fetching from database
@@ -43,13 +49,14 @@ defmodule HamalWeb.CoreComponents do
   attr :pagination, :boolean, default: false
   attr :current_page, :integer, default: 0
   attr :no_of_pages, :integer, default: 0
+
   def pagination(assigns) do
     ~H"""
     <%= if @pagination do %>
       <%= case @current_page do %>
         <% 0 -> %>
           <button class="disabled: text-slate-300" phx-click="first-page" disabled>First</button>
-          <.button_prev_page disabled={true}/>
+          <.button_prev_page disabled={true} />
           <.button_next_page />
           <button phx-click="last-page">Last</button>
         <% cur_page -> %>
@@ -57,13 +64,13 @@ defmodule HamalWeb.CoreComponents do
           <%= if cur_page == @no_of_pages - 1 do %>
             <button phx-click="first-page">First</button>
             <.button_prev_page />
-            <.button_next_page disabled={true}/>
+            <.button_next_page disabled={true} />
             <button class="disabled: text-slate-300" phx-click="last-page" disabled>Last</button>
           <% else %>
-          <button phx-click="first-page">First</button>
-          <.button_prev_page />
-          <.button_next_page />
-          <button phx-click="last-page">Last</button>
+            <button phx-click="first-page">First</button>
+            <.button_prev_page />
+            <.button_next_page />
+            <button phx-click="last-page">Last</button>
           <% end %>
       <% end %>
     <% end %>
@@ -75,11 +82,8 @@ defmodule HamalWeb.CoreComponents do
 
   def add_button(assigns) do
     ~H"""
-    <.link
-      href={@route}
-      class="inline-flex items-center"
-    >
-      <.icon name="hero-plus-circle" /> <%= render_slot(@inner_block) %>
+    <.link href={@route} class="inline-flex items-center">
+      <.icon name="hero-plus-circle" /> {render_slot(@inner_block)}
     </.link>
     """
   end
@@ -89,50 +93,46 @@ defmodule HamalWeb.CoreComponents do
 
   def add_live_button(assigns) do
     ~H"""
-      <.link patch={@route} class="inline-flex items-center">
-        <.icon name="hero-plus-circle" /> <%= render_slot(@inner_block) %>
-      </.link>
+    <.link patch={@route} class="inline-flex items-center">
+      <.icon name="hero-plus-circle" /> {render_slot(@inner_block)}
+    </.link>
     """
   end
 
   attr :disabled, :boolean, default: false
+
   def button_next_page(assigns) do
     ~H"""
     <%= if @disabled do %>
-    <button
-      class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-300 text-slate-300"
-      disabled
-    >
-      <.icon name="hero-forward" />
-    </button>
+      <button class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-300 text-slate-300" disabled>
+        <.icon name="hero-forward" />
+      </button>
     <% else %>
-    <button
-      class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-500 hover:border-slate-300"
-      phx-click="next-page"
-    >
-      <.icon name="hero-forward" />
-    </button>
+      <button
+        class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-500 hover:border-slate-300"
+        phx-click="next-page"
+      >
+        <.icon name="hero-forward" />
+      </button>
     <% end %>
     """
   end
 
   attr :disabled, :boolean, default: false
+
   def button_prev_page(assigns) do
     ~H"""
     <%= if @disabled do %>
-    <button
-      class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-300 text-slate-300"
-      disabled
-      >
-      <.icon name="hero-backward" />
-    </button>
+      <button class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-300 text-slate-300" disabled>
+        <.icon name="hero-backward" />
+      </button>
     <% else %>
-    <button
-      class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-500 hover:border-slate-300"
-      phx-click="prev-page"
-    >
-      <.icon name="hero-backward" />
-    </button>
+      <button
+        class="px-2 mt-4 mx-2 border-2 rounded-md border-slate-500 hover:border-slate-300"
+        phx-click="prev-page"
+      >
+        <.icon name="hero-backward" />
+      </button>
     <% end %>
     """
   end
@@ -149,7 +149,7 @@ defmodule HamalWeb.CoreComponents do
       href={@navigate}
       class="text-white bg-red-500 hover:bg-red-400 w-1/2 text-center rounded-lg py-2 px-3 font-semibold"
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </.link>
     """
   end
@@ -167,7 +167,7 @@ defmodule HamalWeb.CoreComponents do
       class="mb-10 text-black text-center rounded-lg border-2 border-slate-500 hover:border-slate-300 py-2 px-3 font-semibold"
     >
       <.icon name="hero-arrow-left" />
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </.link>
     """
   end
@@ -238,7 +238,7 @@ defmodule HamalWeb.CoreComponents do
                 </button>
               </div>
               <div id={"#{@id}-content"}>
-                <%= render_slot(@inner_block) %>
+                {render_slot(@inner_block)}
               </div>
             </.focus_wrap>
           </div>
@@ -283,9 +283,9 @@ defmodule HamalWeb.CoreComponents do
       <p :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
         <.icon :if={@kind == :info} name="hero-information-circle-mini" class="h-4 w-4" />
         <.icon :if={@kind == :error} name="hero-exclamation-circle-mini" class="h-4 w-4" />
-        <%= @title %>
+        {@title}
       </p>
-      <p class="mt-2 text-sm leading-5"><%= msg %></p>
+      <p class="mt-2 text-sm leading-5">{msg}</p>
       <button type="button" class="group absolute top-1 right-1 p-2" aria-label={gettext("close")}>
         <.icon name="hero-x-mark-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
       </button>
@@ -316,7 +316,7 @@ defmodule HamalWeb.CoreComponents do
         phx-connected={hide("#client-error")}
         hidden
       >
-        <%= gettext("Attempting to reconnect") %>
+        {gettext("Attempting to reconnect")}
         <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
       </.flash>
 
@@ -328,7 +328,7 @@ defmodule HamalWeb.CoreComponents do
         phx-connected={hide("#server-error")}
         hidden
       >
-        <%= gettext("Hang in there while we get back on track") %>
+        {gettext("Hang in there while we get back on track")}
         <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
       </.flash>
     </div>
@@ -362,9 +362,9 @@ defmodule HamalWeb.CoreComponents do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
       <div class="mt-4 space-y-3 bg-white">
-        <%= render_slot(@inner_block, f) %>
+        {render_slot(@inner_block, f)}
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-3">
-          <%= render_slot(action, f) %>
+          {render_slot(action, f)}
         </div>
       </div>
     </.form>
@@ -396,7 +396,7 @@ defmodule HamalWeb.CoreComponents do
       ]}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </button>
     """
   end
@@ -484,12 +484,12 @@ defmodule HamalWeb.CoreComponents do
           class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
           {@rest}
         />
-        <%= @label %>
+        {@label}
       </label>
       <%= if @field_required do %>
         <.required></.required>
       <% end %>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -497,7 +497,7 @@ defmodule HamalWeb.CoreComponents do
   def input(%{type: "select"} = assigns) do
     ~H"""
     <div>
-      <.label for={@id} field_required={@field_required}><%= @label %></.label>
+      <.label for={@id} field_required={@field_required}>{@label}</.label>
       <select
         id={@id}
         name={@name}
@@ -505,10 +505,10 @@ defmodule HamalWeb.CoreComponents do
         multiple={@multiple}
         {@rest}
       >
-        <option :if={@prompt} value=""><%= @prompt %></option>
-        <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
+        <option :if={@prompt} value="">{@prompt}</option>
+        {Phoenix.HTML.Form.options_for_select(@options, @value)}
       </select>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -516,7 +516,7 @@ defmodule HamalWeb.CoreComponents do
   def input(%{type: "textarea"} = assigns) do
     ~H"""
     <div>
-      <.label for={@id} field_required={@field_required}><%= @label %></.label>
+      <.label for={@id} field_required={@field_required}>{@label}</.label>
       <textarea
         id={@id}
         name={@name}
@@ -527,7 +527,7 @@ defmodule HamalWeb.CoreComponents do
         ]}
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -536,7 +536,7 @@ defmodule HamalWeb.CoreComponents do
   def input(assigns) do
     ~H"""
     <div>
-      <.label for={@id} field_required={@field_required}><%= @label %></.label>
+      <.label for={@id} field_required={@field_required}>{@label}</.label>
       <input
         type={@type}
         name={@name}
@@ -550,7 +550,7 @@ defmodule HamalWeb.CoreComponents do
         {@rest}
       />
 
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -568,7 +568,7 @@ defmodule HamalWeb.CoreComponents do
       <%= if @field_required do %>
         <span class="text-md text-red-500">*</span>
       <% end %>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </label>
     """
   end
@@ -582,7 +582,7 @@ defmodule HamalWeb.CoreComponents do
     ~H"""
     <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
       <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </p>
     """
   end
@@ -601,13 +601,13 @@ defmodule HamalWeb.CoreComponents do
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
       <div>
         <h1 class="text-lg font-semibold leading-8 text-zinc-800">
-          <%= render_slot(@inner_block) %>
+          {render_slot(@inner_block)}
         </h1>
         <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
-          <%= render_slot(@subtitle) %>
+          {render_slot(@subtitle)}
         </p>
       </div>
-      <div class="flex-none"><%= render_slot(@actions) %></div>
+      <div class="flex-none">{render_slot(@actions)}</div>
     </header>
     """
   end
@@ -648,9 +648,9 @@ defmodule HamalWeb.CoreComponents do
       <table class="w-[40rem] mt-11 sm:w-full">
         <thead class="text-sm text-left leading-6 text-zinc-500">
           <tr>
-            <th :for={col <- @col} class="p-0 pb-4 pr-6 font-normal"><%= col[:label] %></th>
+            <th :for={col <- @col} class="p-0 pb-4 pr-6 font-normal">{col[:label]}</th>
             <th :if={@action != []} class="relative p-0 pb-4">
-              <span class="sr-only"><%= gettext("Actions") %></span>
+              <span class="sr-only">{gettext("Actions")}</span>
             </th>
           </tr>
         </thead>
@@ -668,7 +668,7 @@ defmodule HamalWeb.CoreComponents do
               <div class="block py-4 pr-6">
                 <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
                 <span class={["relative", i == 0 && "font-semibold text-zinc-900"]}>
-                  <%= render_slot(col, @row_item.(row)) %>
+                  {render_slot(col, @row_item.(row))}
                 </span>
               </div>
             </td>
@@ -679,7 +679,7 @@ defmodule HamalWeb.CoreComponents do
                   :for={action <- @action}
                   class="relative ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
                 >
-                  <%= render_slot(action, @row_item.(row)) %>
+                  {render_slot(action, @row_item.(row))}
                 </span>
               </div>
             </td>
@@ -709,8 +709,8 @@ defmodule HamalWeb.CoreComponents do
     <div class="mt-14">
       <dl class="-my-4 divide-y divide-zinc-100">
         <div :for={item <- @item} class="flex gap-4 py-4 text-sm leading-6 sm:gap-8">
-          <dt class="w-1/4 flex-none text-zinc-500"><%= item.title %></dt>
-          <dd class="text-zinc-700"><%= render_slot(item) %></dd>
+          <dt class="w-1/4 flex-none text-zinc-500">{item.title}</dt>
+          <dd class="text-zinc-700">{render_slot(item)}</dd>
         </div>
       </dl>
     </div>
@@ -735,7 +735,7 @@ defmodule HamalWeb.CoreComponents do
         class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
       >
         <.icon name="hero-arrow-left-solid" class="h-3 w-3" />
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </.link>
     </div>
     """

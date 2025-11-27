@@ -12,8 +12,8 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
       socket
       |> assign(guest: nil)
       |> assign(guest_search: false)
-      |> assign(room_selection_status: nil)
       |> assign(reservation_channels: reservation_channels)
+      |> assign(room_selection_status: nil)
 
     {:ok, socket}
   end
@@ -21,8 +21,6 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   @impl true
   def handle_params(params, _url, socket) do
     live_action = socket.assigns.live_action
-    dbg(params)
-    dbg(live_action)
     socket = apply_live_action(params, live_action, socket)
     {:noreply, socket}
   end
@@ -58,7 +56,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     else
       socket =
         case Bookings.create_reservation(params, selected_rooms_ids, guest) do
-          {:ok, reservation} ->
+          {:ok, _reservation} ->
             socket
             |> put_flash(:info, "Reservation created and confirmation sent!")
             |> push_patch(to: ~p"/admin/reservations")
@@ -114,6 +112,44 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
         end
 
       {:noreply, socket}
+    end
+  end
+
+  def handle_event("confirm-reservation", %{"confirmation_number" => conf_number}, socket) do
+    reservation = socket.assigns.reservation
+
+    case Bookings.update_reservation_status(reservation, conf_number, :confirmed) do
+      {:ok, reservation} ->
+        socket =
+          socket
+          |> assign(reservation: reservation)
+          |> put_flash(:info, "Reservation #{reservation.id} confirmed!")
+
+        {:noreply, socket}
+
+      {:error, _} ->
+        socket = put_flash(socket, :error, "Something went wrong! Contact support!")
+
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("cancel-reservation", _params, socket) do
+    reservation = socket.assigns.reservation
+
+    case Bookings.update_reservation_status(reservation, "", :cancelled) do
+      {:ok, reservation} ->
+        socket =
+          socket
+          |> assign(reservation: reservation)
+          |> put_flash(:info, "Reservation #{reservation.id} cancelled!")
+
+        {:noreply, socket}
+
+      {:error, _} ->
+        socket = put_flash(socket, :error, "Something went wrong! Contact support!")
+
+        {:noreply, socket}
     end
   end
 
@@ -255,6 +291,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
     |> assign(check_out_date: check_out)
     |> assign(reservation: reservation)
     |> assign(rooms: rooms)
+    |> assign(room_selection_status: :error)
     |> assign(selected_rooms: [])
   end
 
@@ -282,13 +319,14 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   end
 
   defp apply_live_action(%{"id" => reservation_id}, :show, socket) do
-    reservation = Bookings.get_reservation(reservation_id)
-    rooms = reservation.rooms |> Hamal.Repo.preload(:stays)
+    reservation = Bookings.get_reservation(reservation_id) |> Hamal.Repo.preload(stays: :guest)
+    rooms = reservation.rooms
 
     socket
     |> assign(rooms: rooms)
     |> assign(reservation: reservation)
     |> assign(action: :show)
+    |> assign(show_confirmation: false)
   end
 
   defp apply_live_action(_params, action, socket) do
@@ -599,20 +637,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
           <:actions>
             <.button>Save</.button>
-            <.button
-              class="bg-gray-600"
-              phx-click="start-check-in"
-              data-confirm={"Start check in for reservation #{@reservation_id}?"}
-            >
-              Check in
-            </.button>
-            <.button
-              data-confirm={"Delete reservation #{@reservation_id} ?"}
-              class="bg-red-500"
-              phx-click="delete"
-            >
-              Delete
-            </.button>
+
             <.link class="underline" patch={~p"/admin/reservations"}>
               Cancel
             </.link>
@@ -626,61 +651,80 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   @impl true
   def render(%{action: :show} = assigns) do
     ~H"""
-    <.modal id="reservation-details" show={true} on_cancel={JS.patch(~p"/admin/reservations")}>
-      <h2>Reservation {@reservation.id} details</h2>
-      <hr />
-      <div class="grid grid-cols-2">
-        <div>
-          <p class="underline mt-4">
-            <.link href={~p"/admin/guests/#{@reservation.guest_id}"}>
-              {@reservation.guest_name} {@reservation.guest_surname}
-            </.link>
-          </p>
-          <ul>
-            <li>
-              Phone:
-              <a class="underline" href={"tel:#{@reservation.contact_number}"}>
-                {@reservation.contact_number}
-              </a>
-            </li>
-            <li>
-              Email:
-              <a class="underline" href={"mailto:#{@reservation.contact_email}"}>
-                {@reservation.contact_email}
-              </a>
-            </li>
-            <li>
-              Period: <span>{date(@reservation.check_in)} - {date(@reservation.check_out)}</span>
-            </li>
-            <li>Number of nights: <span>{@reservation.no_of_nights}</span></li>
-            <li>Channel: <span>{@reservation.channel}</span></li>
-            <li>Breakfast: <span>{yes_or_no(@reservation.breakfast)}</span></li>
-            <li :if={@reservation.company_id}>
-              Company:
-              <.link href={~p"/admin/companies/#{@reservation.company_id}/show"}>
-                <span>{@reservation.company_name}</span>
-              </.link>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <p>Rooms</p>
-          <%= for room <- @rooms do %>
-            <div class=" border-gray-300 border-2 rounded p-1 mt-1">
-              <span class="hover:border-gray-500 hover:cursor-pointer text-lg border-2 rounded">
-                {room.number}
-              </span>
-              <span class="ml-2"> Number of guests </span>
-              <ul :if={room.stays != []}>
-                <li>Guest name surname</li>
-              </ul>
-            </div>
-          <% end %>
-        </div>
+    <h2>Reservation {@reservation.id} details</h2>
+    <%= if @reservation.status == "confirmed" do %>
+      <h3>This reservation is confirmed.</h3>
+      <.button
+        class="w-1/3 mt-6 mb-6"
+        data-confirm={"Are you sure to cancel reservation #{@reservation.id} ? "}
+        phx-click="cancel-reservation"
+      >
+        Cancel reservation
+      </.button>
+    <% else %>
+      <h3 class="text-red-600">
+        This reservation is not confirmed yet.
+      </h3>
+      <div class="w-1/3">
+        <.form for={%{}} phx-submit="confirm-reservation">
+          <.input type="text" name="confirmation_number" value="" label="Confirmation" />
+          <.button class="mt-6 mb-6">Confirm</.button>
+        </.form>
       </div>
-      <p :if={@reservation.notes}>Notes: {@reservation.notes}</p>
-    </.modal>
+    <% end %>
+
+    <hr />
+    <div class="grid grid-cols-2">
+      <div>
+        <p class="underline mt-4">
+          <.link href={~p"/admin/guests/#{@reservation.guest_id}"}>
+            {@reservation.guest_name} {@reservation.guest_surname}
+          </.link>
+        </p>
+        <ul>
+          <li>
+            Phone:
+            <a class="underline" href={"tel:#{@reservation.contact_number}"}>
+              {@reservation.contact_number}
+            </a>
+          </li>
+          <li>
+            Email:
+            <a class="underline" href={"mailto:#{@reservation.contact_email}"}>
+              {@reservation.contact_email}
+            </a>
+          </li>
+          <li>
+            Period: <span>{date(@reservation.check_in)} - {date(@reservation.check_out)}</span>
+          </li>
+          <li>Number of nights: <span>{@reservation.no_of_nights}</span></li>
+          <li>Channel: <span>{@reservation.channel}</span></li>
+          <li>Breakfast: <span>{yes_or_no(@reservation.breakfast)}</span></li>
+          <li :if={@reservation.company_id}>
+            Company:
+            <.link href={~p"/admin/companies/#{@reservation.company_id}/show"}>
+              <span>{@reservation.company_name}</span>
+            </.link>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <p>Rooms</p>
+        <%= for room <- @rooms do %>
+          <div class=" border-gray-300 border-2 rounded p-1 mt-1">
+            <span class="hover:border-gray-500 hover:cursor-pointer text-lg border-2 rounded">
+              {room.number}
+            </span>
+            <span class="ml-2"> Current number of guests </span>
+            <ul :for={stay <- @reservation.stays}>
+              <li :if={stay.room_id == room.id}>{stay.guest.name} {stay.guest.surname}</li>
+            </ul>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    <p :if={@reservation.notes}>Notes: {@reservation.notes}</p>
     """
   end
 end

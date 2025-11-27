@@ -91,6 +91,7 @@ defmodule Hamal.Bookings do
     )
   end
 
+  # all rooms which are not out of order or under maintaince
   def rooms_available_for_reservation() do
     available_rooms_query() |> Repo.all()
   end
@@ -101,7 +102,8 @@ defmodule Hamal.Bookings do
   """
   def get_reserved_rooms_for_period(check_in, check_out) do
     from(reservation in Hamal.Bookings.Reservation,
-      where: reservation.check_in <= ^check_in and reservation.check_out >= ^check_out,
+      where: reservation.check_in < ^check_out,
+      where: reservation.check_out > ^check_in,
       select: reservation,
       preload: [:rooms]
     )
@@ -214,6 +216,22 @@ defmodule Hamal.Bookings do
     rooms = get_rooms_by_ids(room_ids) |> Repo.all()
 
     Reservation.update_changeset(reservation, rooms, params)
+    |> Repo.update()
+  end
+
+  def update_reservation_status(%Reservation{} = reservation, confirmation_number, status) do
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    status = Atom.to_string(status)
+
+    reservation
+    |> Ecto.Changeset.cast(
+      %{status: status, confirmation_number: confirmation_number, status_changed_at: now},
+      [
+        :status,
+        :confirmation_number,
+        :status_changed_at
+      ]
+    )
     |> Repo.update()
   end
 
