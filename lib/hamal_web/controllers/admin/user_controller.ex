@@ -18,6 +18,7 @@ defmodule HamalWeb.Admin.UserController do
   end
 
   def index(conn, _) do
+    IO.inspect(conn)
     users = Accounts.get_users()
     render(conn, :index, users: users, search: false)
   end

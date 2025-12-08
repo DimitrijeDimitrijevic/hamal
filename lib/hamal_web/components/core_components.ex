@@ -19,6 +19,24 @@ defmodule HamalWeb.CoreComponents do
   alias Phoenix.LiveView.JS
   import HamalWeb.Gettext
 
+  attr :active_item, :atom, default: nil
+  attr :href, :string, default: ""
+  attr :item_name, :atom, default: :item_name
+  slot :inner_block, required: true
+
+  def menu_item(assigns) do
+    ~H"""
+    <a
+      href={@href}
+      class={
+        if @active_item == @item_name, do: "underline font-bold tracking-wide ", else: "underline"
+      }
+    >
+      {render_slot(@inner_block)}
+    </a>
+    """
+  end
+
   attr :rooms, :list, default: []
 
   def rooms_selection(assigns) do

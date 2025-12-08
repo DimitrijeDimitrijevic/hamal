@@ -105,7 +105,13 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     is_search = socket.assigns.search
 
     if document_number_length < @document_number_search_starts do
-      socket = if is_search, do: apply_live_action(nil, :index, socket) |> assign(pagination: true) |> assign(search: false), else: socket
+      socket =
+        if is_search,
+          do:
+            apply_live_action(nil, :index, socket)
+            |> assign(pagination: true)
+            |> assign(search: false),
+          else: socket
 
       {:noreply, socket}
     else
@@ -133,7 +139,13 @@ defmodule HamalWeb.Admin.GuestLive.Index do
     is_search = socket.assigns.search
 
     if query_length < @name_search_starts do
-      socket = if is_search, do: apply_live_action(nil, :index, socket) |> assign(pagination: true) |> assign(search: false), else: socket
+      socket =
+        if is_search,
+          do:
+            apply_live_action(nil, :index, socket)
+            |> assign(pagination: true)
+            |> assign(search: false),
+          else: socket
 
       {:noreply, socket}
     else

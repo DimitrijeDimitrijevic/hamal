@@ -3,27 +3,31 @@
     <p class="p-2"><a href={~p"/admin/"}> Menu </a></p>
     <hr />
     <ul class="m-2">
-      <li class="mb-2 mt-2 underline">
-        <a href={~p"/admin"}>Home</a>
-      </li>
-      <li class="mb-2 mt-2 underline">
+      <%!-- <li class="mb-2 mt-2">
+        <a href={~p"/admin"} ca>
+      </li> --%>
+      <li class="mb-2 mt-2">
         <a href={~p"/admin/users"}>Users</a>
       </li>
-      <li class="mb-2 mt-2 underline">
+      <li class="mb-2 mt-2">
         <a href={~p"/admin/rooms"}>Rooms</a>
       </li>
-      <li class="mb-2 mt-2 underline">
-        <a href={~p"/admin/reservations"}>
+      <li class="mb-2 mt-2">
+        <.menu_item
+          href={~p"/admin/reservations"}
+          active_item={@active_item}
+          item_name={:reservations}
+        >
           Reservations
-        </a>
+        </.menu_item>
       </li>
-      <li class="mb-2 mt-2 underline">
+      <li class="mb-2 mt-2">
         <a href={~p"/admin/guests"}>Guests</a>
       </li>
-      <li class="mb-2 mt-2 underline">
+      <li class="mb-2 mt-2">
         <a href={~p"/admin/stays"}>Stays</a>
       </li>
-      <li class="mb-2 mt-2 underline">
+      <li class="mb-2 mt-2">
         <%!-- <a href={~p"/admin/receipts"}>Reciepts</a> --%>
       </li>
     </ul>

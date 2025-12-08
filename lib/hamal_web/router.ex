@@ -59,7 +59,9 @@ defmodule HamalWeb.Router do
     resources "/users", UserController
     resources "/rooms", RoomController
 
-    live_session :admin, layout: {HamalWeb.Layouts, :admin} do
+    live_session :admin,
+      layout: {HamalWeb.Layouts, :admin},
+      on_mount: {HamalWeb.ActiveNavLink, :active_item} do
       live "/guests", GuestLive.Index, :index
       live "/guests/new", GuestLive.Index, :new
       live "/guests/:id", GuestLive.Index, :edit
