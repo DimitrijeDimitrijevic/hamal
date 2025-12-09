@@ -1,4 +1,8 @@
 defmodule HamalWeb.ActiveNavLink do
+  @moduledoc """
+  Handles setting current active menu link as assign in liveview.
+  Useful when we need to mark the current page users is having interaction with.
+  """
   import Phoenix.LiveView
   import Phoenix.Component, only: [assign: 3]
 
@@ -12,6 +16,9 @@ defmodule HamalWeb.ActiveNavLink do
       case socket.view do
         HamalWeb.Admin.ReservationLive.Index ->
           :reservations
+
+        _ ->
+          nil
       end
 
     socket = assign(socket, :active_item, active_item)

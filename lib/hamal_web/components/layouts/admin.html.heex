@@ -7,7 +7,9 @@
         <a href={~p"/admin"} ca>
       </li> --%>
       <li class="mb-2 mt-2">
-        <a href={~p"/admin/users"}>Users</a>
+        <.menu_item href={~p"/admin/users"} active_item={@active_item} item_name={:users}>
+          Users
+        </.menu_item>
       </li>
       <li class="mb-2 mt-2">
         <a href={~p"/admin/rooms"}>Rooms</a>

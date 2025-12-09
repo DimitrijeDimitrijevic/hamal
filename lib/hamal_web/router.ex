@@ -15,6 +15,7 @@ defmodule HamalWeb.Router do
 
   pipeline :admin_section do
     plug HamalWeb.AdminAuth
+    plug HamalWeb.Plugs.ActiveNavLink
     plug :put_layout, html: {HamalWeb.Layouts, :admin}
   end
 
