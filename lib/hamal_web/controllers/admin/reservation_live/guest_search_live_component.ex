@@ -4,12 +4,12 @@ defmodule HamalWeb.Admin.ReservationLive.GuestSearchLiveComponent do
 
   @impl true
   def mount(socket) do
-    socket = assign(socket, guests: [])
+    socket = assign(socket, guests: [], pid: self())
     {:ok, socket}
   end
 
   @impl true
-  def update(assigns, socket) do
+  def update(_assigns, socket) do
     {:ok, socket}
   end
 
@@ -22,6 +22,14 @@ defmodule HamalWeb.Admin.ReservationLive.GuestSearchLiveComponent do
       if guest_query != "", do: Clients.search_guests(guest_query, guest_search_by), else: []
 
     socket = assign(socket, guests: guests)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("guest-selection", %{"guest_id" => guest_id}, socket) do
+    guest = Clients.get_guest(guest_id)
+
+    send(self(), {:add_guest, guest})
     {:noreply, socket}
   end
 
@@ -48,7 +56,8 @@ defmodule HamalWeb.Admin.ReservationLive.GuestSearchLiveComponent do
           row_click={
             fn guest ->
               # To target this live component use option target: @myself
-              JS.push("guest-selection", value: %{guest_id: guest.id})
+              # This event callback should implement every parent live view which is calling this component
+              JS.push("guest-selection", value: %{guest_id: guest.id}, target: @myself)
             end
           }
         >
