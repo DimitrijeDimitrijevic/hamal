@@ -196,14 +196,14 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   end
 
   @impl true
-  def handle_event("start-check-in", %{"value" => reservation_id}, socket) do
+  def handle_event("start-check-in", %{"reservation_id" => reservation_id}, socket) do
     reservation = String.to_integer(reservation_id) |> Bookings.get_reservation()
 
     socket =
       if is_nil(reservation) do
         put_flash(socket, :warning, "Reservation not valid!")
       else
-        push_navigate(socket, to: ~p"/admin/check_in/#{reservation}")
+        push_navigate(socket, to: ~p"/admin/check-in/#{reservation}")
       end
 
     {:noreply, socket}
@@ -712,14 +712,41 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
       <div>
         <p>Rooms</p>
         <%= for room <- @rooms do %>
-          <div class=" border-gray-300 border-2 rounded p-1 mt-1">
-            <span class="hover:border-gray-500 hover:cursor-pointer text-lg border-2 rounded">
-              {room.number}
-            </span>
-            <span class="ml-2"> Current number of guests </span>
-            <ul :for={stay <- @reservation.stays}>
-              <li :if={stay.room_id == room.id}>{stay.guest.name} {stay.guest.surname}</li>
-            </ul>
+          <div>
+            <div class="grid grid-rows-2 border border-slate-400 rounded w-126">
+              <div class="flex items-center justify-between p-4">
+                <a href="#" class="underline text-lg">{room.number}</a>
+                <button
+                  phx-click="start-check-in"
+                  phx-value-reservation_id={@reservation.id}
+                  class="border border-gray rounded p-2 hover:border-gray-500"
+                >
+                  Check In
+                </button>
+              </div>
+              <div>
+                <table class="border border-slate-400 table-auto">
+                  <thead>
+                    <tr>
+                      <th class="border border-slate-300 bg-slate-100">Guest</th>
+                      <th class="border border-slate-300 bg-slate-100">Checked in</th>
+                      <th class="border border-slate-300 bg-slate-100">Expected Check out</th>
+                      <th class="border border-slate-300 bg-slate-100">Checked Out</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="border border-slate-300 text-center p-2">
+                        <a href="#" class="underline"> Dimitrije Dimitrijevic </a>
+                      </td>
+                      <td class="border border-slate-300 text-center p-2">18.10.2025</td>
+                      <td class="border border-slate-300 text-center p-2">19.10.2025</td>
+                      <td class="border border-slate-300 text-center p-2">19.10.2025</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         <% end %>
       </div>

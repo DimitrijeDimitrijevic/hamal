@@ -34,5 +34,5 @@ defmodule HamalWeb.Plugs.ActiveNavLink do
   # Lets determine if we are in user or admin section
   defp admin_or_user(["admin"]), do: :admin
   defp admin_or_user([]), do: :user
-  defp admin_or_user([value | _rest]), do: :other
+  defp admin_or_user([_value | _rest]), do: :other
 end

@@ -5,17 +5,12 @@
   <div class="ml-8">
     <.form :let={f} for={%{}} action={~p"/admin/users"} method="get" class="flex flex-row gap-4">
       <.input field={f[:query]} type="text" placeholder="username@hotelaloha" />
-      <.input
-        field={f[:type]}
-        type="select"
-        prompt="Search by"
-        options={["Name", "Username", "Email"]}
-      />
+      <.input field={f[:type]} type="select" options={["Name", "Username", "Email"]} />
       <button>
         <.icon name="hero-magnifying-glass" /> Search
       </button>
       <.link :if={@search} href={~p"/admin/users"} class="inline-flex items-center underline">
-         Reset search 
+        Reset search
       </.link>
     </.form>
   </div>
