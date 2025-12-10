@@ -8,21 +8,31 @@ defmodule HamalWeb.Plugs.ActiveNavLink do
   def init(default), do: default
 
   def call(conn, _opts) do
-    ["admin", current_path | _rest] = conn.path_info
-    dbg(current_path)
+    path_info = conn.path_info
 
     active_item =
-      case current_path do
-        "users" ->
-          :users
+      if admin_or_user(path_info) in [:admin, :user] do
+        :home
+      else
+        [_admin_or_user, current_path | _rest] = path_info
 
-        "rooms" ->
-          :rooms
+        case current_path do
+          "users" ->
+            :users
 
-        _ ->
-          nil
+          "rooms" ->
+            :rooms
+
+          _ ->
+            nil
+        end
       end
 
     assign(conn, :active_item, active_item)
   end
+
+  # Lets determine if we are in user or admin section
+  defp admin_or_user(["admin"]), do: :admin
+  defp admin_or_user([]), do: :user
+  defp admin_or_user([value | _rest]), do: :other
 end

@@ -1,20 +1,19 @@
-<div class="flex flex-row h-full mt-1">
-  <div class="flex-col border-r-2 min-h-screen w-64">
+<div class="flex flex-row min-h-screen">
+  <nav class="border-r-2 w-1/6">
     <p class="p-2"><a href={~p"/admin/"}> Menu </a></p>
     <hr />
-    <ul class="m-2">
-      <%!-- <li class="mb-2 mt-2">
-        <a href={~p"/admin"} ca>
-      </li> --%>
-      <li class="mb-2 mt-2">
+    <ul class="ml-2">
+      <li class="mb-2">
         <.menu_item href={~p"/admin/users"} active_item={@active_item} item_name={:users}>
           Users
         </.menu_item>
       </li>
-      <li class="mb-2 mt-2">
-        <a href={~p"/admin/rooms"}>Rooms</a>
+      <li class="mb-2">
+        <.menu_item href={~p"/admin/rooms"} active_item={@active_item} item_name={:rooms}>
+          Rooms
+        </.menu_item>
       </li>
-      <li class="mb-2 mt-2">
+      <li class="mb-2">
         <.menu_item
           href={~p"/admin/reservations"}
           active_item={@active_item}
@@ -23,21 +22,25 @@
           Reservations
         </.menu_item>
       </li>
-      <li class="mb-2 mt-2">
-        <a href={~p"/admin/guests"}>Guests</a>
+      <li class="mb-2">
+        <.menu_item href={~p"/admin/guests"} active_item={@active_item} item_name={:guests}>
+          Guests
+        </.menu_item>
       </li>
-      <li class="mb-2 mt-2">
-        <a href={~p"/admin/stays"}>Stays</a>
+      <li class="mb-2">
+        <.menu_item href={~p"/admin/stays"} active_item={@active_item} item_name={:stays}>
+          Stays
+        </.menu_item>
       </li>
-      <li class="mb-2 mt-2">
+      <li class="mb-2">
         <%!-- <a href={~p"/admin/receipts"}>Reciepts</a> --%>
       </li>
     </ul>
-  </div>
+  </nav>
   <div>
     <.flash_group flash={@flash} />
   </div>
-  <main class="w-full px-4 pr-4 mt-2">
+  <main class="w-full ml-4 pr-2 mt-2">
     <!--- Main Content of the page from other templates --->
     {@inner_content}
     

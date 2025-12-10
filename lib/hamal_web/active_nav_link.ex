@@ -11,18 +11,22 @@ defmodule HamalWeb.ActiveNavLink do
     {:cont, socket}
   end
 
-  defp set_active_item(params, url, socket) do
+  defp set_active_item(_params, _url, socket) do
     active_item =
       case socket.view do
         HamalWeb.Admin.ReservationLive.Index ->
           :reservations
 
+        HamalWeb.Admin.GuestLive.Index ->
+          :guests
+
+        HamalWeb.Admin.StaysLive.Index ->
+          :stays
+
         _ ->
           nil
       end
 
-    socket = assign(socket, :active_item, active_item)
-
-    {:cont, socket}
+    {:cont, assign(socket, :active_item, active_item)}
   end
 end
