@@ -201,9 +201,9 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
 
     socket =
       if is_nil(reservation) do
-        put_flash(socket, :warning, "Reservation not valid!")
+        put_flash(socket, :error, "Reservation not valid!")
       else
-        push_navigate(socket, to: ~p"/admin/check-in/#{reservation}")
+        push_navigate(socket, to: ~p"/admin/check-in/#{reservation}?room_id=")
       end
 
     {:noreply, socket}
@@ -719,6 +719,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
                 <button
                   phx-click="start-check-in"
                   phx-value-reservation_id={@reservation.id}
+                  phx-value-room_id={room.id}
                   class="border border-gray rounded p-2 hover:border-gray-500"
                 >
                   Check In

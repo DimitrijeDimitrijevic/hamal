@@ -19,6 +19,16 @@ defmodule HamalWeb.Admin.CheckInLive do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("remove-guest", %{"guest_id" => guest_id}, socket) do
+    guest_id = String.to_integer(guest_id)
+
+    selected_guests = Enum.reject(socket.assigns.selected_guests, fn sg -> sg.id == guest_id end)
+    socket = assign(socket, selected_guests: selected_guests)
+
+    {:noreply, socket}
+  end
+
   # @impl true
   # def handle_event("guest-selection", %{"guest_id" => guest_id}, socket) do
   #   guest = Clients.get_guest(guest_id)
@@ -28,7 +38,6 @@ defmodule HamalWeb.Admin.CheckInLive do
   #
   @impl true
   def handle_info({:add_guest, guest}, socket) do
-    dbg(socket.assigns)
     selected_guests = socket.assigns.selected_guests
 
     if Enum.member?(selected_guests, guest) do
