@@ -28,7 +28,9 @@ defmodule Hamal.Clients.Guest do
     :country,
     :document_number,
     :document_type,
-    :birth_date
+    :birth_date,
+    :email,
+    :phone
   ]
 
   schema "guests" do

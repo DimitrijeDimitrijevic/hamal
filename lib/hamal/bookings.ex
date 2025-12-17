@@ -322,6 +322,13 @@ defmodule Hamal.Bookings do
     |> Repo.update()
   end
 
-  ## GEt only relevant stays for a room and for reservation
-  ## stay.room_id in room_ids as list and stay_id.reservation_id == reservation.id
+  def room_in_reservation?(%Reservation{rooms: rooms}, room_number) do
+    rooms
+    |> Enum.map(& &1.number)
+    |> Enum.member?(room_number)
+  end
+
+  def get_room_by_number(room_number) when is_integer(room_number) do
+    Repo.get_by(Room, number: room_number)
+  end
 end

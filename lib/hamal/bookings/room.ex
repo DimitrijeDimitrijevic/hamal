@@ -4,8 +4,8 @@ defmodule Hamal.Bookings.Room do
 
   @min_room_price 1000
 
-  @permitted [:number, :no_of_beds, :price, :notes]
-  @required [:number, :no_of_beds, :price]
+  @permitted [:number, :no_of_beds, :price, :notes, :min_occupancy, :max_occupancy]
+  @required [:number, :no_of_beds, :price, :min_occupancy, :max_occupancy]
 
   schema "rooms" do
     field :number, :integer
@@ -13,6 +13,8 @@ defmodule Hamal.Bookings.Room do
     field :price, :integer
     field :notes, :string
     field :status, :integer, default: 0
+    field :min_occupancy, :integer, default: 1
+    field :max_occupancy, :integer
     many_to_many :reservations, Hamal.Bookings.Reservation, join_through: "reservations_rooms"
     has_many :stays, Hamal.Bookings.Stay
 
@@ -24,6 +26,7 @@ defmodule Hamal.Bookings.Room do
     |> cast(params, @permitted)
     |> validate_required(@required)
     |> validate_number(:price, greater_than_or_equal_to: @min_room_price)
+    # this also requires unique_index in migration
     |> unique_constraint([:number])
   end
 

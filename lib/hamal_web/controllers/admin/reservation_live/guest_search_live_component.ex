@@ -37,7 +37,7 @@ defmodule HamalWeb.Admin.ReservationLive.GuestSearchLiveComponent do
   def render(assigns) do
     ~H"""
     <div>
-      <h2>Guest selection</h2>
+      <h2>Search guests</h2>
       <div class="ml-2 mr-2">
         <.form for={%{}} phx-change="guest-search" phx-target={@myself} class="flex flex-row gap-2">
           <.input type="text" name="guest-query" value="" />
@@ -51,7 +51,7 @@ defmodule HamalWeb.Admin.ReservationLive.GuestSearchLiveComponent do
       </div>
       <%= if not Enum.empty?(@guests) do %>
         <.table
-          id="guets"
+          id="guests"
           rows={@guests}
           row_click={
             fn guest ->
@@ -65,6 +65,8 @@ defmodule HamalWeb.Admin.ReservationLive.GuestSearchLiveComponent do
           <:col :let={guest} label="Surname">{guest.surname}</:col>
           <:col :let={guest} label="Email">{guest.email}</:col>
           <:col :let={guest} label="Phone">{guest.phone}</:col>
+          <:col :let={guest} label="Document type">{guest.document_type}</:col>
+          <:col :let={guest} label="Document number">{guest.document_number}</:col>
         </.table>
       <% end %>
     </div>

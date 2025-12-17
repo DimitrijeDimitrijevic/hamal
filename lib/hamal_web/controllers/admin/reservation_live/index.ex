@@ -196,30 +196,19 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
   end
 
   @impl true
-  def handle_event("start-check-in", %{"reservation_id" => reservation_id}, socket) do
+  def handle_event(
+        "start-check-in",
+        %{"reservation_id" => reservation_id, "room_number" => room_number},
+        socket
+      ) do
     reservation = String.to_integer(reservation_id) |> Bookings.get_reservation()
 
     socket =
-      if is_nil(reservation) do
+      if is_nil(reservation) or Bookings.room_in_reservation?(reservation, room_number) do
         put_flash(socket, :error, "Reservation not valid!")
       else
-        push_navigate(socket, to: ~p"/admin/check-in/#{reservation}?room_id=")
+        push_navigate(socket, to: ~p"/admin/check-in/#{reservation}?room_no=#{room_number}")
       end
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("guest-selection", %{"guest_id" => guest_id}, socket) do
-    guest = Hamal.Clients.get_guest(guest_id)
-
-    reservation =
-      socket.assigns.reservation.source |> assign_guest_to_current_reservation_form(guest)
-
-    socket =
-      socket
-      |> assign(reservation: reservation)
-      |> assign(guest: guest)
 
     {:noreply, socket}
   end
@@ -258,6 +247,19 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
       |> assign(search_params: search_params)
       |> assign(search: false)
       |> push_navigate(to: ~p"/admin/reservations")
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:add_guest, guest}, socket) do
+    reservation =
+      socket.assigns.reservation.source |> assign_guest_to_current_reservation_form(guest)
+
+    socket =
+      socket
+      |> assign(reservation: reservation)
+      |> assign(guest: guest)
 
     {:noreply, socket}
   end
@@ -434,7 +436,6 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
       <:col :let={reservation} label="Rooms">{reserved_rooms(reservation.rooms)}</:col>
       <:action :let={reservation}>
         <.link patch={~p"/admin/reservations/#{reservation}/edit"}> Edit </.link>
-        <button class="ml-4" value={reservation.id} phx-click="start-check-in">Check in</button>
       </:action>
     </.table>
     """
@@ -656,7 +657,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
       <h3>This reservation is confirmed.</h3>
       <.button
         class="w-1/3 mt-6 mb-6"
-        data-confirm={"Are you sure to cancel reservation #{@reservation.id} ? "}
+        data-confirm={"Cancel reservation #{@reservation.id} ? "}
         phx-click="cancel-reservation"
       >
         Cancel reservation
@@ -719,7 +720,7 @@ defmodule HamalWeb.Admin.ReservationLive.Index do
                 <button
                   phx-click="start-check-in"
                   phx-value-reservation_id={@reservation.id}
-                  phx-value-room_id={room.id}
+                  phx-value-room_number={room.number}
                   class="border border-gray rounded p-2 hover:border-gray-500"
                 >
                   Check In
